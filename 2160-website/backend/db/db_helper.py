@@ -7,8 +7,9 @@ import pandas as pd
 #DEFINITIONS
 
 #FUNCTIONS
-
+###########################################################################
 def fetch_data(query, params=None):
+###########################################################################
     """
     Fetches data from the SQLite database based on the provided query and parameters and returns a pandas DataFrame.
     
@@ -39,9 +40,12 @@ def fetch_data(query, params=None):
     except Exception:
         print(traceback.format_exc())
         return None
+###########################################################################
 
 
+###########################################################################
 def execute_query(query, params=None):
+###########################################################################
     """
     Executes an SQL query that modifies the database (INSERT, UPDATE, DELETE).
     
@@ -62,8 +66,4 @@ def execute_query(query, params=None):
         
     except Exception:
         traceback.format_exc()
-
-
-def create_upsert_cmd(table_name, data):
-    pass
-    
+###########################################################################
