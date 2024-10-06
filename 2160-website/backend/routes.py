@@ -1,5 +1,5 @@
 from flask import Flask
-
+from db import db_helper as db
 app = Flask(__name__)
 
 @app.route("/")
