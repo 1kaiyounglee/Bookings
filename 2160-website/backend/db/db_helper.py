@@ -67,3 +67,4 @@ def execute_query(query, params=None):
     except Exception:
         traceback.format_exc()
 ###########################################################################
+
