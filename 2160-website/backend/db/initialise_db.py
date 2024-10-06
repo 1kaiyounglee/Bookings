@@ -1,9 +1,8 @@
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
-from models.users import Users
-
+from models.Users import Users
+from db_config import engine, Session
 # Define the engine and base
-engine = create_engine('sqlite:///holidaybookinsystem.db')
 
 # Step 4: Create the Database and Tables from Scratch
 def setup_database():
@@ -13,7 +12,6 @@ def setup_database():
 
 # Step 5: Insert Sample Data
 def insert_sample_data():
-    Session = sessionmaker(bind=engine)
     session = Session()
 
     # Insert sample users

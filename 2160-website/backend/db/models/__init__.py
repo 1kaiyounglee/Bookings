@@ -4,4 +4,4 @@ from sqlalchemy.ext.declarative import declarative_base
 Base = declarative_base()
 
 # Import all model classes so they are registered with Base
-from .users import Users
+from .Users import Users
