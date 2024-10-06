@@ -1,3 +1,4 @@
 flask===3.0.3
 sqlalchemy==2.0.35
 pyodbc==5.1.0
+pandas==2.0.3

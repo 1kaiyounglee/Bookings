@@ -1,19 +1,26 @@
+#IMPORTS
+
 import sqlite3
 import traceback
+import pandas as pd
+
+#DEFINITIONS
+
+#FUNCTIONS
 
 def fetch_data(query, params=None):
     """
-    Fetches data from the SQLite database based on the provided query and parameters.
+    Fetches data from the SQLite database based on the provided query and parameters and returns a pandas DataFrame.
     
     Args:
         query (str): The SQL query to execute.
         params (tuple): A tuple of parameters to pass into the query (optional).
     
     Returns:
-        list: A list of rows retrieved from the query.
+        pd.DataFrame: A pandas DataFrame containing the retrieved rows.
     """
     try:
-        with sqlite3.connect('holidaybookingsystem.db') as cnxn:
+        with sqlite3.connect('db/holidaybookingsystem.db') as cnxn:
             cursor = cnxn.cursor()
             
             if params is None:
@@ -21,11 +28,17 @@ def fetch_data(query, params=None):
             else:
                 cursor.execute(query, params)
             
+            # Fetch all rows and column names
             rows = cursor.fetchall()
+            column_names = [description[0] for description in cursor.description]
             
-            return rows
+            # Convert to a pandas DataFrame
+            df = pd.DataFrame(rows, columns=column_names)
+            
+            return df
     except Exception:
-        traceback.format_exc()
+        print(traceback.format_exc())
+        return None
 
 
 def execute_query(query, params=None):
@@ -37,7 +50,7 @@ def execute_query(query, params=None):
         params (tuple): A tuple of parameters to pass into the query (optional).
     """
     try:
-        with sqlite3.connect('holidaybookingsystem.db') as cnxn:
+        with sqlite3.connect('db/holidaybookingsystem.db') as cnxn:
             cursor = cnxn.cursor()
             
             if params is None:
