@@ -127,7 +127,7 @@ def make_backup(tablename):
         os.makedirs(backup_folder)
     
     # Get the current date and time formatted as day-month-year - hour-minute
-    current_time = datetime.now().strftime("%d-%m-%Y_%H:%M")
+    current_time = datetime.now().strftime("%d-%m-%Y_%H-%M")
     
     # Create the backup file path
     backup_file = os.path.join(backup_folder, f"{tablename} backup - {current_time}.json")
