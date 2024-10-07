@@ -5,7 +5,6 @@ from models import Base
 class Users(Base):
     __tablename__ = 'Users'
     
-    uid         = Column(Integer, primary_key=True, autoincrement=True)
-    email       = Column(String, nullable=False)
+    email       = Column(String, primary_key=True, nullable=False)
     password    = Column(String, nullable=False)
     is_admin    = Column(Boolean, default=False)

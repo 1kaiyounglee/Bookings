@@ -7,6 +7,7 @@ from db_config import engine, Session
 # Step 4: Create the Database and Tables from Scratch
 def setup_database():
     from models import Base  # Ensure that the Base is imported from the correct location
+    Base.metadata.drop_all(engine, tables=[Users.__table__])
     Base.metadata.create_all(engine)  # This creates all tables defined
     print("Database and tables created!")
 
