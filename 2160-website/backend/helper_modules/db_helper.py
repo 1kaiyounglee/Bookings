@@ -1,30 +1,37 @@
 from sqlalchemy.orm import sessionmaker
 import pandas as pd
 import traceback
-from sqlalchemy import text
+from sqlalchemy import text, inspect, Boolean
 from db.db_config import Session
-import sys
-import sys
-import os
+import sys, os, re
 from datetime import datetime
 current_dir = os.path.dirname(os.path.abspath(__file__))
 if current_dir not in sys.path:
     sys.path.append(current_dir)
+
+
+
+
+
 # Define the session
 
 def fetch_data(query, params=None):
     """
     Fetches data from the database using a raw SQL query and returns a pandas DataFrame.
+    Automatically converts BOOLEAN-like columns to Python booleans.
     
     Args:
         query (str): The SQL query to execute.
         params (dict): Optional dictionary of parameters to bind to the query.
     
     Returns:
-        pd.DataFrame: A pandas DataFrame containing the retrieved rows.
+        pd.DataFrame: A pandas DataFrame containing the retrieved rows, with boolean columns converted.
     """
     try:
         session = Session()
+
+        # Extract table name from the SQL query
+        table_name = extract_table_name(query)
 
         # Execute the raw SQL query
         if params:
@@ -39,6 +46,23 @@ def fetch_data(query, params=None):
         # Convert to a pandas DataFrame
         df = pd.DataFrame(rows, columns=column_names)
 
+        # If a table name was successfully extracted, inspect its columns for boolean types
+        if table_name:
+            boolean_columns = []
+            # Get table metadata
+            inspector = inspect(session.get_bind())
+            columns_info = inspector.get_columns(table_name)
+            
+            # Identify boolean columns
+            for column_info in columns_info:
+                if isinstance(column_info['type'], Boolean):
+                    boolean_columns.append(column_info['name'])
+            
+            # Convert boolean-like columns to Python booleans
+            for col in boolean_columns:
+                if col in df.columns:
+                    df[col] = df[col].astype(bool)
+
         # Close the session
         session.close()
 
@@ -46,47 +70,57 @@ def fetch_data(query, params=None):
     except Exception:
         print(traceback.format_exc())
         return None
+    
 
-def create_upsert(table_name, df):
+
+
+def upsert_data(table_name, df):
     """
-    Generates an UPSERT SQL command text with embedded values (no placeholders).
+    Performs an UPSERT operation on the specified table using the data in the DataFrame.
     
     Args:
         table_name (str): The name of the table to upsert data into.
         df (pd.DataFrame): The DataFrame containing data to insert/update.
     
     Returns:
-        str: The generated UPSERT SQL command with values directly embedded.
+        bool: True if the operation is successful, False otherwise.
     """
-    
-    # Extract column names from the DataFrame
     try:
+        # Extract column names and values from the DataFrame
         columns = df.columns.tolist()
+        values = df.iloc[0].to_dict()  # Assuming one row; extend logic if multiple rows
         
-        # Convert DataFrame values to a list of tuples
-        values = df.values.tolist()[0]  # Assuming one row; extend logic if multiple rows
-        
-        # Build the SQL command with values directly embedded
+        # Build the SQL command with placeholders (let SQLAlchemy handle the type conversion)
         column_names = ', '.join(columns)
-        value_placeholders = ', '.join([f"'{str(value)}'" for value in values])  # Embed values directly
+        value_placeholders = ', '.join([f":{col}" for col in columns])  # Use parameter placeholders
         
         # Generate conflict target, assuming the first column is the primary key or unique constraint
         conflict_target = columns[0]
         
         # Build the SET clause for updating on conflict
-        set_clause = ', '.join([f"{col} = '{str(value)}'" for col, value in zip(columns[1:], values[1:])])
+        set_clause = ', '.join([f"{col} = :{col}" for col in columns[1:]])
         
-        # Construct the full UPSERT SQL command with embedded values
+        # Construct the full UPSERT SQL command with placeholders
         cmd_text = f"""
         INSERT INTO {table_name} ({column_names})
         VALUES ({value_placeholders})
         ON CONFLICT ({conflict_target})
         DO UPDATE SET {set_clause};
         """
+        
+        # Start a new session and execute the UPSERT operation
+        session = Session()
+        session.execute(text(cmd_text), values)
+        session.commit()  # Commit the transaction
+        
+        print("UPSERT operation completed successfully.")
+        return True
     except Exception:
-        print(traceback.format_exc())
-    return cmd_text
-   
+        session.rollback()  # Rollback in case of error
+        print(f"Error during UPSERT operation: {traceback.format_exc()}")
+        return False
+    finally:
+        session.close()
 
 def exec_cmd(sql_command):
     """
@@ -161,3 +195,21 @@ def read_backup(filename):
     except Exception as e:
         print(f"Error reading backup: {e}")
         return None
+    
+
+
+def extract_table_name(query):
+    """
+    Extracts the table name from the SQL query string.
+    
+    Args:
+        query (str): The SQL query to parse.
+    
+    Returns:
+        str: The extracted table name or None if no table name is found.
+    """
+    # Use regex to find the word immediately after 'FROM' or 'from'
+    match = re.search(r'FROM\s+([a-zA-Z_][a-zA-Z0-9_]*)', query, re.IGNORECASE)
+    if match:
+        return match.group(1)
+    return None
