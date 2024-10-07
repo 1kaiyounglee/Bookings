@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { getUsers } from './HelperFunctions/GetDatabaseModels';
+import loadingGif from './assets/Dancing Minion GIF - Dancing Minion - Discover & Share GIFs.gif';
 function App() {
   const [users, setUsers] = useState([]);
 
@@ -24,6 +25,8 @@ function App() {
           </li>
         ))}
       </ul>
+      {/* Add a local GIF */}
+      <img src={loadingGif} alt="Loading animation" />
     </div>
   );
 }
