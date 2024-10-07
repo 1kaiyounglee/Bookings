@@ -1,70 +1,48 @@
-#IMPORTS
-
-import sqlite3
-import traceback
+from sqlalchemy.orm import sessionmaker
 import pandas as pd
+import traceback
+from sqlalchemy import text
+from db.db_config import Session
+import sys
+import sys
+import os
 
-#DEFINITIONS
+current_dir = os.path.dirname(os.path.abspath(__file__))
+if current_dir not in sys.path:
+    sys.path.append(current_dir)
+# Define the session
 
-#FUNCTIONS
-###########################################################################
 def fetch_data(query, params=None):
-###########################################################################
     """
-    Fetches data from the SQLite database based on the provided query and parameters and returns a pandas DataFrame.
+    Fetches data from the database using a raw SQL query and returns a pandas DataFrame.
     
     Args:
         query (str): The SQL query to execute.
-        params (tuple): A tuple of parameters to pass into the query (optional).
+        params (dict): Optional dictionary of parameters to bind to the query.
     
     Returns:
         pd.DataFrame: A pandas DataFrame containing the retrieved rows.
     """
     try:
-        with sqlite3.connect('db/holidaybookingsystem.db') as cnxn:
-            cursor = cnxn.cursor()
-            
-            if params is None:
-                cursor.execute(query)
-            else:
-                cursor.execute(query, params)
-            
-            # Fetch all rows and column names
-            rows = cursor.fetchall()
-            column_names = [description[0] for description in cursor.description]
-            
-            # Convert to a pandas DataFrame
-            df = pd.DataFrame(rows, columns=column_names)
-            
-            return df
+        session = Session()
+
+        # Execute the raw SQL query
+        if params:
+            result = session.execute(text(query), params)
+        else:
+            result = session.execute(text(query))
+
+        # Fetch all rows and column names
+        rows = result.fetchall()
+        column_names = result.keys()
+
+        # Convert to a pandas DataFrame
+        df = pd.DataFrame(rows, columns=column_names)
+
+        # Close the session
+        session.close()
+
+        return df
     except Exception:
         print(traceback.format_exc())
         return None
-###########################################################################
-
-
-###########################################################################
-def execute_query(query, params=None):
-###########################################################################
-    """
-    Executes an SQL query that modifies the database (INSERT, UPDATE, DELETE).
-    
-    Args:
-        query (str): The SQL query to execute.
-        params (tuple): A tuple of parameters to pass into the query (optional).
-    """
-    try:
-        with sqlite3.connect('db/holidaybookingsystem.db') as cnxn:
-            cursor = cnxn.cursor()
-            
-            if params is None:
-                cursor.execute(query)
-            else:
-                cursor.execute(query, params)
-        
-            cnxn.commit()
-        
-    except Exception:
-        traceback.format_exc()
-###########################################################################
-
