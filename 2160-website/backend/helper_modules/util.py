@@ -22,9 +22,10 @@ def update_user(email, password, is_admin=False):
         
         print(user_data)
         # Generate the UPSERT SQL for the Users table
-        cmd_text = db.create_upsert('Users', user_data)
+        cmd_text = db.upsert_data('Users', user_data)
         print(cmd_text)
         db.exec_cmd(cmd_text)
     except Exception:
         print(traceback.format_exc())
+
     

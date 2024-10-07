@@ -6,8 +6,7 @@ function App() {
   // Fetch users from the Flask backend by sending a query
   useEffect(() => {
     // The SQL query to be executed
-    getUsers("email = 'kai'")
-      .then(response => response.json())
+    getUsers()
       .then(data => {
         setUsers(data);
         console.log("Users data fetched from backend:", data);
@@ -21,7 +20,7 @@ function App() {
       <ul>
         {users.map((user, index) => (
           <li key={index}>
-            Email: {user.email}, Admin: {user.is_admin ? 'Yes' : 'No'}
+            Email: {user.email}, Admin: {user.isAdmin ? 'Yes' : 'No'}
           </li>
         ))}
       </ul>
