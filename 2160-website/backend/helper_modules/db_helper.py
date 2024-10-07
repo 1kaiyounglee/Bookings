@@ -6,7 +6,7 @@ from db.db_config import Session
 import sys
 import sys
 import os
-
+from datetime import datetime
 current_dir = os.path.dirname(os.path.abspath(__file__))
 if current_dir not in sys.path:
     sys.path.append(current_dir)
@@ -106,3 +106,51 @@ def exec_cmd(sql_command):
         print(f"An error occurred: {traceback.format_exc()}")
     finally:
         session.close()  # Always close the session
+
+
+def make_backup(tablename):
+    # Fetch the data
+    df = fetch_data(f"SELECT * FROM {tablename}")
+    
+    if df is None or df.empty:
+        print(f"No data found in table: {tablename}")
+        return
+    
+    # Create the backups folder if it doesn't exist
+    backup_folder = os.path.join("backend", "db", "backups")
+    if not os.path.exists(backup_folder):
+        os.makedirs(backup_folder)
+    
+    # Get the current date and time formatted as day/month/year - hour:minute
+    current_time = datetime.now().strftime("%d/%m/%Y (%H:%M)")
+    
+    # Create the backup file path
+    backup_file = os.path.join(backup_folder, f"{tablename} backup - {current_time}.json")
+    
+    # Convert the DataFrame to JSON and save it to the backup file
+    try:
+        df.to_json(backup_file, orient='records', indent=4)  # Save the DataFrame to a JSON file
+        print(f"Backup of {tablename} saved to {backup_file}")
+    except Exception as e:
+        print(f"Error saving backup: {traceback.format_exc()}")
+
+
+def read_backup(filename):
+    # Construct the full path to the backup file
+    backup_folder = os.path.join("backend", "db", "backups")
+    backup_file = os.path.join(backup_folder, filename)
+
+    # Check if the file exists
+    if not os.path.exists(backup_file):
+        print(f"File {filename} does not exist in backups folder.")
+        return None
+    
+    # Read the JSON file and convert it to a DataFrame
+    try:
+        df = pd.read_json(backup_file)
+        print(f"Backup {filename} successfully read.")
+        return df
+    except Exception as e:
+        print(f"Error reading backup: {e}")
+        return None
+    
