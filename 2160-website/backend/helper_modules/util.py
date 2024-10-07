@@ -27,4 +27,5 @@ def update_user(email, password, is_admin=False):
         db.exec_cmd(cmd_text)
     except Exception:
         print(traceback.format_exc())
+
     

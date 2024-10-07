@@ -3,7 +3,3 @@ from datetime import datetime
 data = db.fetch_data(query="SELECT * FROM Users")
 print(data)
 print(data.dtypes)
-# db.make_backup('Users')
-
-
-# ut.update_user("kai", "asdasdasdasdasd", False)
