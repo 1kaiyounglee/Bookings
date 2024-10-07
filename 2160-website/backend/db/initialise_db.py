@@ -18,6 +18,9 @@ def insert_sample_data():
     sample_users = [
         Users(email='kai@gmail.com', password='forntie', is_admin=False),
         Users(email='haha@gmail.com', password='skibidi', is_admin=True),
+        Users(email='asd@gmail.com', password='sasdasdkibidi', is_admin=True),
+        Users(email='haha@asdasdasd.com', password='skibiasdasdasdasdsaddi', is_admin=True),
+
     ]
 
     session.add_all(sample_users)

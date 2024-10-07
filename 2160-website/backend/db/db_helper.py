@@ -2,7 +2,14 @@ from sqlalchemy.orm import sessionmaker
 import pandas as pd
 import traceback
 from sqlalchemy import text
-from db_config import Session
+from db.db_config import Session
+import sys
+import sys
+import os
+
+current_dir = os.path.dirname(os.path.abspath(__file__))
+if current_dir not in sys.path:
+    sys.path.append(current_dir)
 # Define the session
 
 def fetch_data(query, params=None):
