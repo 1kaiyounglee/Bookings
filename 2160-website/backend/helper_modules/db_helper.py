@@ -116,13 +116,18 @@ def make_backup(tablename):
         print(f"No data found in table: {tablename}")
         return
     
+    # Get the absolute path to the current file (db_helper.py)
+    current_dir = os.path.dirname(os.path.abspath(__file__))
+    
+    # Create the full path to the backups folder inside backend/db
+    backup_folder = os.path.join(current_dir, "..", "db", "backups")
+    
     # Create the backups folder if it doesn't exist
-    backup_folder = os.path.join("backend", "db", "backups")
     if not os.path.exists(backup_folder):
         os.makedirs(backup_folder)
     
-    # Get the current date and time formatted as day/month/year - hour:minute
-    current_time = datetime.now().strftime("%d/%m/%Y (%H:%M)")
+    # Get the current date and time formatted as day-month-year - hour-minute
+    current_time = datetime.now().strftime("%d-%m-%Y_%H:%M")
     
     # Create the backup file path
     backup_file = os.path.join(backup_folder, f"{tablename} backup - {current_time}.json")
@@ -136,8 +141,11 @@ def make_backup(tablename):
 
 
 def read_backup(filename):
-    # Construct the full path to the backup file
-    backup_folder = os.path.join("backend", "db", "backups")
+    # Get the absolute path to the current file (db_helper.py)
+    current_dir = os.path.dirname(os.path.abspath(__file__))
+    
+    # Construct the full path to the backups folder inside backend/db
+    backup_folder = os.path.join(current_dir, "..", "db", "backups")
     backup_file = os.path.join(backup_folder, filename)
 
     # Check if the file exists
@@ -153,4 +161,3 @@ def read_backup(filename):
     except Exception as e:
         print(f"Error reading backup: {e}")
         return None
-    
