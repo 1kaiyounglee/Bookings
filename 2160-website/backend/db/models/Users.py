@@ -5,6 +5,9 @@ from models import Base
 class Users(Base):
     __tablename__ = 'Users'
     
-    email       = Column(String, primary_key=True, nullable=False)
-    password    = Column(String, nullable=False)
-    is_admin    = Column(Boolean, default=False)
+    email           = Column(String, primary_key=True, nullable=False)
+    password        = Column(String, nullable=False)
+    phone_number    = Column(String, nullable=False)
+    first_name      = Column(String, nullable=False)
+    last_name       = Column(String, nullable=False)
+    is_admin        = Column(Boolean, default=False)
