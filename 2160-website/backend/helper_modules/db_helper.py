@@ -213,3 +213,33 @@ def extract_table_name(query):
     if match:
         return match.group(1)
     return None
+
+
+
+
+# Assuming fetch_data is available and properly defined in db_helper
+
+from db_helper import fetch_data
+
+def fetch_and_print_all_tables():
+    # List of SQL queries for all tables
+    queries = {
+        "Users": "SELECT * FROM Users;",
+        "Packages": "SELECT * FROM Packages;",
+        "Bookings": "SELECT * FROM Bookings;",
+        "Orders": "SELECT * FROM Orders;",
+        "OrderItems": "SELECT * FROM OrderItems;",
+        "Locations": "SELECT * FROM Locations;",
+        "Categories": "SELECT * FROM Categories;",
+        "PackageCategory": "SELECT * FROM PackageCategory;"
+    }
+    
+    for table, query in queries.items():
+        print(f"Fetching data from {table} table:")
+        data = fetch_data(query)
+        if data is not None:
+            print(data)
+        else:
+            print(f"No data found or error in fetching data from {table}.")
+        print("\n" + "="*50 + "\n")
+
