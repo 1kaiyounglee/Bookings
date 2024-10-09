@@ -213,3 +213,8 @@ def extract_table_name(query):
     if match:
         return match.group(1)
     return None
+
+
+
+
+
