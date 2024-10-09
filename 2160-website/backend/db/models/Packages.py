@@ -7,7 +7,6 @@ class Packages(Base):
     __tablename__ = 'Packages'
     
     package_id          = Column(Integer, primary_key=True, autoincrement=True)
-    default_hotel_id    = Column(Integer, nullable=False)  # FK to Hotels table (if applicable)
     location_id         = Column(Integer, ForeignKey('Locations.location_id'), nullable=False)
     description         = Column(String, nullable=False)
     duration            = Column(Integer, nullable=False)
