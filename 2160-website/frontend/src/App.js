@@ -7,7 +7,7 @@ function App() {
   // Fetch users from the Flask backend by sending a query
   useEffect(() => {
     // The SQL query to be executed
-    getUsers()
+    getUsers()  
       .then(data => {
         setUsers(data);
         console.log("Users data fetched from backend:", data);
