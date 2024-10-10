@@ -27,3 +27,18 @@ export const registerUser = async (values) => {
     }
   };
   
+export async function handleLogin(values) {
+  const response = await fetch('http://localhost:5000/api/auth/login', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ email: values.email, password: values.password })
+  });
+
+  const data = await response.json();
+  if (response.ok) {
+    localStorage.setItem('jwt_token', data.access_token);  // Store the JWT token in LocalStorage
+    console.log('User logged in successfully');
+  } else {
+    console.error('Login failed:', data.msg);
+  }
+  }

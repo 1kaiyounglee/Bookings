@@ -1,10 +1,11 @@
 import React, { useState, useEffect } from 'react';
 import { createTheme, ThemeProvider } from '@mui/material/styles';
 import Grid2 from '@mui/material/Grid2'; // Grid2 is still in an unstable state
-import { AppBar, Toolbar, Typography, Button, IconButton, Container, Box } from '@mui/material';
-import { Menu as MenuIcon, ArrowBackIos, ArrowForwardIos } from '@mui/icons-material';
+import { Container, Box, Typography, IconButton, Button } from '@mui/material';
+import { ArrowBackIos, ArrowForwardIos } from '@mui/icons-material';
 import { deepPurple } from '@mui/material/colors';
-import LoginRegisterModal from './Modals/LoginRegisterModal'; // Import the modal
+import LoginRegisterModal from './Components/LoginRegisterModal'; // Import the modal
+import Navbar from './Components/Navbar'; // Import the new Navbar component
 
 // Create a dark theme
 const darkTheme = createTheme({
@@ -52,17 +53,8 @@ function App() {
   return (
     <ThemeProvider theme={darkTheme}>
       <Box sx={{ flexGrow: 1 }}>
-        <AppBar position="static">
-          <Toolbar>
-            <IconButton size="large" edge="start" color="inherit" aria-label="menu" sx={{ mr: 2 }}>
-              <MenuIcon />
-            </IconButton>
-            <Typography variant="h6" component="div" sx={{ flexGrow: 1 }}>
-              Holiday Booking System
-            </Typography>
-            <Button color="inherit" onClick={openModal}>Sign In / Register</Button>
-          </Toolbar>
-        </AppBar>
+        {/* Use the Navbar component */}
+        <Navbar onLoginRegisterClick={openModal} />
 
         {/* Slideshow Section */}
         <Box

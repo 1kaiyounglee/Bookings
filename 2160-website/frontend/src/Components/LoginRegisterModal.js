@@ -1,9 +1,9 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Modal, Box, IconButton, Typography, TextField, Button, Checkbox, FormControlLabel } from '@mui/material';
 import CloseRoundedIcon from '@mui/icons-material/CloseRounded'; // Rounded close icon
 import { Formik, Form, Field } from 'formik';
 import * as Yup from 'yup';
-import { registerUser } from '../HelperFunctions/SendData'; // Import the registerUser function
+import { registerUser, handleLogin } from '../HelperFunctions/SendData'; // Import both register and login functions
 
 const modalStyle = {
   position: 'absolute',
@@ -30,11 +30,11 @@ const validationSchemaRegister = Yup.object({
   phone_number: Yup.string().required('Required'), // Note that we now refer to phone_number internally
 });
 
-function LoginRegisterModal({ open, onClose }) {
+function LoginRegisterModal({ open, onClose, setIsLoggedIn }) {
   const [isLogin, setIsLogin] = useState(true); // Manage whether it's login or register form
 
   // Close the modal on ESC key press
-  React.useEffect(() => {
+  useEffect(() => {
     const handleKeyDown = (event) => {
       if (event.key === 'Escape') {
         onClose();
@@ -75,12 +75,25 @@ function LoginRegisterModal({ open, onClose }) {
           <Formik
             initialValues={{ email: '', password: '', rememberMe: false }}
             validationSchema={validationSchemaLogin}
-            onSubmit={(values) => {
-              // Handle login logic
-              console.log('Login form values:', values);
+            onSubmit={async (values, { setSubmitting, setErrors }) => {
+              try {
+                // Call the login function
+                const result = await handleLogin(values);
+                if (!result.error) {
+                  // If login successful, close modal and set login state
+                  setIsLoggedIn(true);
+                  onClose();
+                } else {
+                  // Show login error on Formik form
+                  setErrors({ email: result.error || 'Invalid email or password' });
+                }
+              } catch (error) {
+                setErrors({ email: 'Failed to login. Please try again.' });
+              }
+              setSubmitting(false);
             }}
           >
-            {({ errors, touched }) => (
+            {({ errors, touched, isSubmitting }) => (
               <Form>
                 <Field
                   as={TextField}
@@ -113,8 +126,8 @@ function LoginRegisterModal({ open, onClose }) {
                 <Typography variant="body2" sx={{ mb: 2, color: 'lightblue', cursor: 'pointer' }}>
                   Forgot Password?
                 </Typography>
-                <Button type="submit" variant="contained" fullWidth>
-                  Login
+                <Button type="submit" variant="contained" fullWidth disabled={isSubmitting}>
+                  {isSubmitting ? 'Logging in...' : 'Login'}
                 </Button>
                 <Typography variant="body2" sx={{ mt: 2, textAlign: 'center', color: 'white' }}>
                   Don't have an account?{' '}
@@ -126,7 +139,7 @@ function LoginRegisterModal({ open, onClose }) {
             )}
           </Formik>
         ) : (
-            <Formik
+          <Formik
             initialValues={{
               firstName: '',
               lastName: '',
@@ -137,9 +150,8 @@ function LoginRegisterModal({ open, onClose }) {
             validationSchema={validationSchemaRegister}
             onSubmit={async (values, { setSubmitting }) => {
               try {
-                // Handle registration logic
                 const result = await registerUser(values);
-          
+
                 if (result.error) {
                   console.error('Error:', result.error); // Log error in console only
                 } else {
@@ -149,7 +161,7 @@ function LoginRegisterModal({ open, onClose }) {
               } catch (error) {
                 console.error('Unexpected error:', error); // Log unexpected errors
               }
-          
+
               setSubmitting(false); // Stop the loading indicator after the submission
             }}
           >
@@ -223,7 +235,6 @@ function LoginRegisterModal({ open, onClose }) {
               </Form>
             )}
           </Formik>
-          
         )}
       </Box>
     </Modal>
