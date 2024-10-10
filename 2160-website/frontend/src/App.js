@@ -23,6 +23,13 @@ function App() {
       setModalOpen(false); // Close the modal after login
     }
   }, [isLoggedIn]);
+  
+  useEffect(() => {
+    const token = localStorage.getItem('jwt_token');
+    if (token) {
+      setIsLoggedIn(true); // Revalidate the token and close modal
+    }
+  }, []); // On page refresh
 
   const handleLogout = () => {
     localStorage.removeItem('jwt_token'); // Remove token

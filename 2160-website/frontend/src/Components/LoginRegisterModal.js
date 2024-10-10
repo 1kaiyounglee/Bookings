@@ -1,5 +1,12 @@
 import React, { useState, useEffect } from 'react';
-import { Modal, Box, IconButton, Typography, TextField, Button } from '@mui/material';
+import {
+  Modal,
+  Box,
+  IconButton,
+  Typography,
+  TextField,
+  Button,
+} from '@mui/material';
 import CloseRoundedIcon from '@mui/icons-material/CloseRounded'; // Rounded close icon
 import { Visibility, VisibilityOff } from '@mui/icons-material'; // For password visibility
 import { Formik, Form, Field } from 'formik';
@@ -83,24 +90,24 @@ function LoginRegisterModal({ open, onClose, setIsLoggedIn }) {
             validationSchema={validationSchemaLogin}
             onSubmit={async (values, { setSubmitting, setErrors }) => {
               try {
-                // Call the login function
                 const result = await handleLogin(values);
                 if (!result.error) {
                   // Save JWT token to localStorage
                   localStorage.setItem('jwt_token', result.access_token);
-
-                  // Set logged in state to true and close modal
-                  setIsLoggedIn(true);
-                  onClose();
+                  
+                  setSubmitting(false); // Stop the loading state before closing the modal
+                  setIsLoggedIn(true); // Set logged in state to true
+                  onClose(); // Close the modal
                 } else {
                   // Show login error on Formik form
                   setErrors({ email: result.error || 'Invalid email or password' });
+                  setSubmitting(false); // Stop submitting
                 }
               } catch (error) {
                 setErrors({ email: 'Failed to login. Please try again.' });
+                setSubmitting(false); // Stop submitting on error
               }
-              setSubmitting(false);
-            }}
+           }}
           >
             {({ errors, touched, isSubmitting }) => (
               <Form>

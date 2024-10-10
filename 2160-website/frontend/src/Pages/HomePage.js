@@ -113,7 +113,7 @@ function HomePage() {
         </IconButton>
 
         {/* Dots Indicator */}
-        <Box sx={{ position: 'absolute', bottom: '20px', display: 'flex', gap: '8px' }}>
+        <Box sx={{ position: 'absolute', bottom: '80px', display: 'flex', gap: '8px' }}>
           {slides.map((_, index) => (
             <Box
               key={index}
