@@ -1,9 +1,8 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { createTheme, ThemeProvider } from '@mui/material/styles';
 import { AppBar, Toolbar, Typography, Button, IconButton, Container, Box, Grid } from '@mui/material';
-import { Menu as MenuIcon } from '@mui/icons-material';
+import { Menu as MenuIcon, ArrowBackIos, ArrowForwardIos } from '@mui/icons-material';
 import { deepPurple } from '@mui/material/colors';
-import { useState } from 'react';
 
 // Create a dark theme
 const darkTheme = createTheme({
@@ -16,10 +15,24 @@ const darkTheme = createTheme({
 function App() {
   const [currentSlide, setCurrentSlide] = useState(0);
   const slides = ['Popular Package 1', 'Popular Package 2', 'Popular Package 3', 'Popular Package 4'];
+  const colors = ['#1abc9c', '#3498db', '#9b59b6', '#e74c3c']; // Background colors for each slide
+
+  // Automatically go to the next slide every 7.5 seconds
+  useEffect(() => {
+    const slideInterval = setInterval(() => {
+      nextSlide();
+    }, 7500);
+
+    return () => clearInterval(slideInterval); // Cleanup the interval on component unmount
+  }, [currentSlide]);
 
   // Function to handle slideshow slide change
   const nextSlide = () => {
     setCurrentSlide((prev) => (prev + 1) % slides.length);
+  };
+
+  const prevSlide = () => {
+    setCurrentSlide((prev) => (prev - 1 + slides.length) % slides.length);
   };
 
   return (
@@ -43,7 +56,7 @@ function App() {
         <Box
           sx={{
             height: '100vh',
-            backgroundColor: '#212121',
+            backgroundColor: colors[currentSlide],
             display: 'flex',
             justifyContent: 'center',
             alignItems: 'center',
@@ -51,15 +64,92 @@ function App() {
             textAlign: 'center',
             position: 'relative',
             overflow: 'hidden',
+            transition: 'background-color 0.5s ease-in-out', // Smooth background color transition
           }}
         >
-          <Box sx={{ position: 'absolute', top: '40%', width: '100%' }}>
-            <Typography variant="h3" sx={{ mb: 2 }}>
-              {slides[currentSlide]}
-            </Typography>
-            <Button variant="outlined" color="inherit" onClick={nextSlide}>
-              Next
-            </Button>
+          {/* Left Arrow */}
+          <IconButton
+            onClick={prevSlide}
+            sx={{
+              position: 'absolute',
+              left: 0,
+              color: 'white',
+              fontSize: '3rem',
+              zIndex: 10,
+              opacity: 0.5,
+              '&:hover': { opacity: 1 },
+            }}
+          >
+            <ArrowBackIos fontSize="large" />
+          </IconButton>
+
+          {/* Current Slide */}
+          <Box
+            sx={{
+              width: '100%',
+              display: 'flex',
+              justifyContent: 'center',
+              alignItems: 'center',
+              overflow: 'hidden',
+            }}
+          >
+            <Box
+              sx={{
+                display: 'flex',
+                transition: 'transform 0.5s ease-in-out', // Slide effect
+                transform: `translateX(-${currentSlide * 100}%)`, // Moves slides left or right
+                width: `${slides.length * 100}%`,
+              }}
+            >
+              {slides.map((slide, index) => (
+                <Box
+                  key={index}
+                  sx={{
+                    minWidth: '100%',
+                    display: 'flex',
+                    justifyContent: 'center',
+                    alignItems: 'center',
+                    height: '100vh',
+                  }}
+                >
+                  <Typography variant="h3" sx={{ mb: 2 }}>
+                    {slide}
+                  </Typography>
+                </Box>
+              ))}
+            </Box>
+          </Box>
+
+          {/* Right Arrow */}
+          <IconButton
+            onClick={nextSlide}
+            sx={{
+              position: 'absolute',
+              right: 0,
+              color: 'white',
+              fontSize: '3rem',
+              zIndex: 10,
+              opacity: 0.5,
+              '&:hover': { opacity: 1 },
+            }}
+          >
+            <ArrowForwardIos fontSize="large" />
+          </IconButton>
+
+          {/* Dots Indicator */}
+          <Box sx={{ position: 'absolute', bottom: '20px', display: 'flex', gap: '8px' }}>
+            {slides.map((_, index) => (
+              <Box
+                key={index}
+                sx={{
+                  width: '12px',
+                  height: '12px',
+                  borderRadius: '50%',
+                  backgroundColor: currentSlide === index ? 'white' : 'grey',
+                  transition: 'background-color 0.3s',
+                }}
+              />
+            ))}
           </Box>
         </Box>
 
@@ -68,10 +158,6 @@ function App() {
           <Typography variant="h4" gutterBottom>
             Explore our services
           </Typography>
-          <Typography paragraph>
-            Scroll past the slideshow to view more options, manage bookings, make bookings, and more!
-          </Typography>
-
           {/* Manage Bookings and other options */}
           <Grid container spacing={2}>
             <Grid item xs={12} sm={6} md={4}>
