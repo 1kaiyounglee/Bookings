@@ -23,7 +23,7 @@ const validationSchemaLogin = Yup.object({
   password: Yup.string().required('Required'),
 });
 
-function LoginModal({ open, onClose, setIsLoggedIn, onRegisterClick }) {
+function LoginModal({ open, onClose, setIsLoggedIn, onRegisterClick, setLoading }) {
   const [showPassword, setShowPassword] = useState(false);
 
   const togglePasswordVisibility = () => {
@@ -33,13 +33,17 @@ function LoginModal({ open, onClose, setIsLoggedIn, onRegisterClick }) {
   return (
     <Modal
       open={open}  // Open state controlled by App.js
-      onClose={onClose}  // Modal close handler
+      onClose={(_, reason) => {  // Prevent closing on backdrop click, but allow ESC key and close button
+        if (reason !== 'backdropClick') {
+          onClose();
+        }
+      }}
       aria-labelledby="login-modal"
     >
       <Box sx={modalStyle}>
         <IconButton
           aria-label="close"
-          onClick={onClose}  // Close modal when clicked
+          onClick={onClose}  // Close modal when cancel button is clicked
           sx={{ position: 'absolute', right: 8, top: 8, color: 'white' }}
         >
           <CloseRoundedIcon />
@@ -53,6 +57,7 @@ function LoginModal({ open, onClose, setIsLoggedIn, onRegisterClick }) {
           initialValues={{ email: '', password: '' }}
           validationSchema={validationSchemaLogin}
           onSubmit={async (values, { setSubmitting, setErrors }) => {
+            setLoading(true);  // Start full-page loading
             try {
               const result = await handleLogin(values);
               if (!result.error) {
@@ -67,6 +72,7 @@ function LoginModal({ open, onClose, setIsLoggedIn, onRegisterClick }) {
               setErrors({ email: 'Failed to login. Please try again.' });
             }
             setSubmitting(false);
+            setLoading(false);  // Stop full-page loading
           }}
         >
           {({ errors, touched, isSubmitting }) => (

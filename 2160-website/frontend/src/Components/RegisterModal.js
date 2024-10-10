@@ -43,14 +43,19 @@ function RegisterModal({ open, onClose }) {
 
   return (
     <Modal
-      open={open}  // Modal open state controlled by parent
-      onClose={onClose}  // Ensure close function works
+      open={open}
+      onClose={(_, reason) => {
+        // Prevent closing on backdrop click but allow ESC key and close button
+        if (reason !== 'backdropClick') {
+          onClose();
+        }
+      }}
       aria-labelledby="register-modal"
     >
       <Box sx={modalStyle}>
         <IconButton
           aria-label="close"
-          onClick={onClose}  // Close modal on click
+          onClick={onClose}  // Close modal when cancel button is clicked
           sx={{ position: 'absolute', right: 8, top: 8, color: 'white' }}
         >
           <CloseRoundedIcon />
