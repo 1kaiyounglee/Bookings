@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Container, Box, IconButton, Button, Typography } from '@mui/material';
+import { Container, Box, IconButton, Typography, Button } from '@mui/material';
 import { ArrowBackIos, ArrowForwardIos } from '@mui/icons-material';
 import { getPackages } from '../HelperFunctions/GetDatabaseModels';  // Import the function that fetches packages
 
@@ -56,23 +56,21 @@ function HomePage() {
           justifyContent: 'center',
           alignItems: 'center',
           backgroundImage: backgroundImage === defaultColor ? 'none' : backgroundImage,
-          backgroundColor: backgroundImage === defaultColor ? defaultColor : 'transparent',
-          backgroundSize: 'cover',
-          backgroundPosition: 'center',
+          backgroundSize: 'cover',  // Scales image to cover entire area, may crop parts
+          backgroundPosition: 'center',  // Centers the image
+          backgroundRepeat: 'no-repeat',
           cursor: 'pointer',
           position: 'relative',
         }}
         onClick={() => handleSlideClick(slide.package_id)}  // Make the slide clickable
       >
-        {/* Position text next to the left arrow with no background */}
+        {/* Overlay for package details */}
         <Box
           sx={{
             position: 'absolute',
-            bottom: '50%',
-            left: '60px',  // Positioned to the right of the left arrow
-            transform: 'translateY(50%)',
+            bottom: '20px',
+            left: '20px',
             color: 'white',
-            textAlign: 'left',
           }}
         >
           <Typography variant="h4">{slide.description}</Typography>
@@ -175,10 +173,10 @@ function HomePage() {
         <Box
           sx={{
             backgroundColor: '#2e2e2e',
-            padding: '10px',  // Reduce padding to make the box smaller
+            padding: '10px',
             margin: 'auto',
-            width: 'fit-content', // Make the width fit the content
-            borderRadius: '8px', // Optional: Rounded corners for a nicer look
+            width: 'fit-content',
+            borderRadius: '8px',
             textAlign: 'center',
           }}
         >
