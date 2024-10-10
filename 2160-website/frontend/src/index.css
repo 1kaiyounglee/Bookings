@@ -11,3 +11,10 @@ code {
   font-family: source-code-pro, Menlo, Monaco, Consolas, 'Courier New',
     monospace;
 }
+body, html {
+  margin: 0;
+  padding: 0;
+  background-color: #2e2e2e;  /* To enforce the grey background globally */
+  color: white;
+  overflow-x: hidden;
+}

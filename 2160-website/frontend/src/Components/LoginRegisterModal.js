@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Modal, Box, IconButton, Typography, TextField, Button, Checkbox, FormControlLabel } from '@mui/material';
 import CloseRoundedIcon from '@mui/icons-material/CloseRounded'; // Rounded close icon
+import { Visibility, VisibilityOff } from '@mui/icons-material'; // Icons for show/hide password
 import { Formik, Form, Field } from 'formik';
 import * as Yup from 'yup';
 import { registerUser, handleLogin } from '../HelperFunctions/SendData'; // Import both register and login functions
@@ -32,6 +33,7 @@ const validationSchemaRegister = Yup.object({
 
 function LoginRegisterModal({ open, onClose, setIsLoggedIn }) {
   const [isLogin, setIsLogin] = useState(true); // Manage whether it's login or register form
+  const [showPassword, setShowPassword] = useState(false); // Manage password visibility
 
   // Close the modal on ESC key press
   useEffect(() => {
@@ -46,6 +48,10 @@ function LoginRegisterModal({ open, onClose, setIsLoggedIn }) {
 
   const toggleForm = () => {
     setIsLogin(!isLogin);
+  };
+
+  const togglePasswordVisibility = () => {
+    setShowPassword(!showPassword);
   };
 
   return (
@@ -75,13 +81,14 @@ function LoginRegisterModal({ open, onClose, setIsLoggedIn }) {
           <Formik
             initialValues={{ email: '', password: '', rememberMe: false }}
             validationSchema={validationSchemaLogin}
-            onSubmit={async (values, { setSubmitting, setErrors }) => {
+            onSubmit={async (values, { setSubmitting, setErrors, resetForm }) => {
               try {
                 // Call the login function
                 const result = await handleLogin(values);
                 if (!result.error) {
                   // If login successful, close modal and set login state
                   setIsLoggedIn(true);
+                  resetForm(); // Reset the form to remove validation errors
                   onClose();
                 } else {
                   // Show login error on Formik form
@@ -106,29 +113,41 @@ function LoginRegisterModal({ open, onClose, setIsLoggedIn }) {
                   error={touched.email && Boolean(errors.email)}
                   helperText={touched.email && errors.email}
                 />
+
                 <Field
                   as={TextField}
                   name="password"
-                  type="password"
+                  type={showPassword ? 'text' : 'password'}
                   label="Password"
                   fullWidth
                   margin="normal"
                   InputLabelProps={{ style: { color: 'white' } }} // White label text
-                  InputProps={{ style: { color: 'white' } }} // White input text
+                  InputProps={{
+                    style: { color: 'white' },
+                    endAdornment: (
+                      <IconButton onClick={togglePasswordVisibility} sx={{ color: 'white' }}>
+                        {showPassword ? <VisibilityOff /> : <Visibility />}
+                      </IconButton>
+                    ),
+                  }}
                   error={touched.password && Boolean(errors.password)}
                   helperText={touched.password && errors.password}
                 />
+
                 <FormControlLabel
                   control={<Field as={Checkbox} name="rememberMe" />}
                   label="Keep me logged in"
                   sx={{ color: 'white' }} // White checkbox label
                 />
+
                 <Typography variant="body2" sx={{ mb: 2, color: 'lightblue', cursor: 'pointer' }}>
                   Forgot Password?
                 </Typography>
+
                 <Button type="submit" variant="contained" fullWidth disabled={isSubmitting}>
                   {isSubmitting ? 'Logging in...' : 'Login'}
                 </Button>
+
                 <Typography variant="body2" sx={{ mt: 2, textAlign: 'center', color: 'white' }}>
                   Don't have an account?{' '}
                   <span style={{ color: 'lightblue', cursor: 'pointer' }} onClick={toggleForm}>
@@ -203,12 +222,19 @@ function LoginRegisterModal({ open, onClose, setIsLoggedIn }) {
                 <Field
                   as={TextField}
                   name="password"
-                  type="password"
+                  type={showPassword ? 'text' : 'password'}
                   label="Password"
                   fullWidth
                   margin="normal"
                   InputLabelProps={{ style: { color: 'white' } }} // White label text
-                  InputProps={{ style: { color: 'white' } }} // White input text
+                  InputProps={{
+                    style: { color: 'white' },
+                    endAdornment: (
+                      <IconButton onClick={togglePasswordVisibility} sx={{ color: 'white' }}>
+                        {showPassword ? <VisibilityOff /> : <Visibility />}
+                      </IconButton>
+                    ),
+                  }}
                   error={touched.password && Boolean(errors.password)}
                   helperText={touched.password && errors.password}
                 />

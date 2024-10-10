@@ -9,18 +9,22 @@ auth_bp = Blueprint('auth', __name__)
 @auth_bp.route('/login', methods=['POST'])
 def login():
     data = request.json
-    email = data.get('email')
-    password = data.get('password')
+    email = data.get('email').strip().lower()
+    password = data.get('password').strip()
 
-    # Validate the user's credentials (replace with real DB validation)
-    query = f"SELECT * FROM Users WHERE email = '{email}' AND password = '{password}'"
-    user = db.fetch_data(query)
+    # Use parameterized query to prevent SQL injection
+    query = "SELECT * FROM Users WHERE email = :email AND password = :password"
+    params = {"email": email, "password": password}
+
+    user = db.fetch_data(query, params)
 
     if user is not None and not user.empty:
-        access_token = create_access_token(identity=email, expires_delta=timedelta(hours=1))
+        access_token = create_access_token(identity=email, expires_delta=timedelta(days=30))
         return jsonify(access_token=access_token), 200
     else:
-        return jsonify({"msg": "Email of Password is Incorrect"}), 401
+        print(user, email, password)
+        return jsonify({"msg": f"Email or Password is Incorrect{user, email, password}"}), 401
+
 
 # Protected route example that requires a valid JWT token
 @auth_bp.route('/protected', methods=['GET'])
