@@ -4,3 +4,4 @@ pyodbc==5.1.0
 pandas==2.0.3
 numpy==1.24.4
 flask-cors==5.0.0
+bcrypt==4.2.0
