@@ -1,5 +1,6 @@
 from flask import Blueprint, request, jsonify
 from helper_modules import db_helper as db
+import pandas as pd
 
 api_db = Blueprint('database', __name__)
 
@@ -23,6 +24,44 @@ def execute_query():
             return jsonify(result_data), 200
         else:
             return jsonify({'message': 'No data found.'}), 404
+
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
+
+@api_db.route('/create_user', methods=['POST'])
+def create_user():
+    try:
+        # Get the user data from the frontend request
+        data = request.json
+        first_name = data.get('first_name')
+        last_name = data.get('last_name')
+        email = data.get('email')
+        password = data.get('password')
+        phone_number = data.get('phone_number')
+
+        # Check if email exists in the database
+        check_query = f"SELECT * FROM Users WHERE email = '{email}'"
+        existing_user = db.fetch_data(check_query)
+
+        if existing_user is not None and not existing_user.empty:
+            return jsonify({'error': 'Email already exists.'}), 400
+
+        # Insert the new user into the database using upsert
+        user_data = {
+            'first_name': first_name,
+            'last_name': last_name,
+            'email': email,
+            'password': password,  
+            'phone_number': phone_number,
+            'is_admin': False,
+        }
+
+        df = pd.DataFrame([user_data])
+        if db.upsert_data('Users', df):
+            return jsonify({'message': 'User created successfully!'}), 201
+        else:
+            return jsonify({'error': 'Failed to create user.'}), 500
 
     except Exception as e:
         return jsonify({'error': str(e)}), 500

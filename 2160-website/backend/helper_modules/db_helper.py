@@ -86,20 +86,33 @@ def upsert_data(table_name, df):
         bool: True if the operation is successful, False otherwise.
     """
     try:
+        # Ensure all required columns (including those with defaults like is_admin) are in the DataFrame
+        # Fetching the table metadata using SQLAlchemy to validate columns and apply defaults
+        session = Session()
+        table_metadata = session.execute(f"PRAGMA table_info({table_name})").fetchall()
+        session.close()
+
+        table_columns = {col[1]: col for col in table_metadata}  # Dictionary of column names and info
+        
+        # Adding missing columns with default values to df, if necessary
+        for col_name, col_info in table_columns.items():
+            if col_name not in df.columns and col_info[4] is not None:  # col_info[4] is the default value
+                df[col_name] = col_info[4]  # Assign the default value to the missing column
+
         # Extract column names and values from the DataFrame
         columns = df.columns.tolist()
         values = df.iloc[0].to_dict()  # Assuming one row; extend logic if multiple rows
-        
+
         # Build the SQL command with placeholders (let SQLAlchemy handle the type conversion)
         column_names = ', '.join(columns)
         value_placeholders = ', '.join([f":{col}" for col in columns])  # Use parameter placeholders
-        
+
         # Generate conflict target, assuming the first column is the primary key or unique constraint
-        conflict_target = columns[0]
-        
-        # Build the SET clause for updating on conflict
-        set_clause = ', '.join([f"{col} = :{col}" for col in columns[1:]])
-        
+        conflict_target = columns[0]  # The first column is assumed to be the conflict target (primary key)
+
+        # Build the SET clause for updating on conflict (skip conflict_target in update)
+        set_clause = ', '.join([f"{col} = :{col}" for col in columns if col != conflict_target])
+
         # Construct the full UPSERT SQL command with placeholders
         cmd_text = f"""
         INSERT INTO {table_name} ({column_names})
@@ -107,17 +120,17 @@ def upsert_data(table_name, df):
         ON CONFLICT ({conflict_target})
         DO UPDATE SET {set_clause};
         """
-        
-        # Start a new session and execute the UPSERT operation
+
+        # Execute the UPSERT operation
         session = Session()
         session.execute(text(cmd_text), values)
         session.commit()  # Commit the transaction
-        
+
         print("UPSERT operation completed successfully.")
         return True
-    except Exception:
+    except Exception as e:
         session.rollback()  # Rollback in case of error
-        print(f"Error during UPSERT operation: {traceback.format_exc()}")
+        print(f"Error during UPSERT operation: {e}")
         return False
     finally:
         session.close()
