@@ -60,6 +60,7 @@ function LoginModal({ open, onClose, setIsLoggedIn, onRegisterClick, setLoading 
             setLoading(true);  // Start full-page loading
             try {
               const result = await handleLogin(values);
+              console.log("RESULT:", result);
               if (!result.error) {
                 localStorage.setItem('jwt_token', result.access_token);
                 setIsLoggedIn(true);

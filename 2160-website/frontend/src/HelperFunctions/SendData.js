@@ -35,10 +35,13 @@ export async function handleLogin(values) {
   });
 
   const data = await response.json();
+  
   if (response.ok) {
     localStorage.setItem('jwt_token', data.access_token);  // Store the JWT token in LocalStorage
     console.log('User logged in successfully');
+    return data;  // Return data for successful login
   } else {
     console.error('Login failed:', data.msg);
+    return { error: data.msg };  // Return an error object for failed login
   }
-  }
+}

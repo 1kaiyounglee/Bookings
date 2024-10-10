@@ -23,7 +23,7 @@ def login():
         return jsonify(access_token=access_token), 200
     else:
         print(user, email, password)
-        return jsonify({"msg": f"Email or Password is Incorrect{user, email, password}"}), 401
+        return jsonify({"msg": f"Email or Password is Incorrect"}), 401
 
 
 # Protected route example that requires a valid JWT token
