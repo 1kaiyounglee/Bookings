@@ -60,4 +60,37 @@ export async function getUsers(whereClause = "") {
   
     return users; // Return the array of user objects
   }
-  
+
+// Function to get all Packages data and transform it into a JSON object
+export async function getPackages(whereClause = "") {
+  // Fetch the package data from the Packages table with optional conditions
+  const data = await getData("Packages", whereClause);
+
+  if (!data) {
+    return null; // Handle the case where no data is returned
+  }
+
+  // Fetch the related data for images, categories, and locations
+  const imagesData = await getData("PackageImages");
+  const categoriesData = await getData("PackageCategory");
+  const locationsData = await getData("Locations");
+
+  // Transform the data into a dictionary-like object (JSON format)
+  const packages = data.map((pkg) => {
+    const relatedImages = imagesData.filter((img) => img.package_id === pkg.package_id);
+    const relatedCategories = categoriesData.filter((cat) => cat.package_id === pkg.package_id);
+    const relatedLocation = locationsData.find((loc) => loc.location_id === pkg.location_id);
+
+    return {
+      package_id: pkg.package_id,
+      description: pkg.description,
+      duration: pkg.duration,
+      price: pkg.price,
+      location: relatedLocation ? relatedLocation.location_name : null, // Include location name if available
+      images: relatedImages.map((img) => img.image_path), // Get paths of related images
+      categories: relatedCategories.map((cat) => cat.category_id) // Get related category IDs
+    };
+  });
+
+  return packages; // Return the array of package objects
+}
