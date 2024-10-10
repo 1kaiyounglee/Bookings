@@ -1,6 +1,7 @@
 from flask import Blueprint, request, jsonify
 from helper_modules import db_helper as db
 import pandas as pd
+import bcrypt  # Import bcrypt for password hashing
 
 api_db = Blueprint('database', __name__)
 
@@ -47,11 +48,14 @@ def create_user():
         if existing_user is not None and not existing_user.empty:
             return jsonify({'error': 'Email already exists.'}), 400
 
+        # Hash the password using bcrypt before storing it in the database
+        hashed_password = bcrypt.hashpw(password.encode('utf-8'), bcrypt.gensalt())
+
         # Insert the new user into the database using upsert
         user_data = {
             'email': email,
             'phone_number': phone_number,
-            'password': password,  
+            'password': hashed_password.decode('utf-8'),  # Store the hashed password
             'first_name': first_name,
             'last_name': last_name,
             'is_admin': False,
