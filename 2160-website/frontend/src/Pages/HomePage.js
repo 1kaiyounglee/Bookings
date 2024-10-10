@@ -1,20 +1,29 @@
 import React, { useState, useEffect } from 'react';
-import { Container, Box, IconButton, Button } from '@mui/material';
+import { Container, Box, IconButton, Button, Typography } from '@mui/material';
 import { ArrowBackIos, ArrowForwardIos } from '@mui/icons-material';
-import { Typography } from '@mui/material';
+import { getPackages } from '../HelperFunctions/GetDatabaseModels';  // Import the function that fetches packages
 
 function HomePage() {
   const [currentSlide, setCurrentSlide] = useState(0);
-  const slides = ['Popular Package 1', 'Popular Package 2', 'Popular Package 3', 'Popular Package 4'];
-  const colors = ['#1abc9c', '#3498db', '#9b59b6', '#e74c3c']; // Background colors for each slide
+  const [slides, setSlides] = useState([]);  // Store package data
+  const defaultColor = '#2e2e2e';  // Default grey color for packages with no image
+  
+  // Fetch packages when the component mounts
+  useEffect(() => {
+    async function fetchPackages() {
+      const packages = await getPackages();
+      setSlides(packages || []);  // Set the slides to be the packages or an empty array if none
+    }
+    fetchPackages();
+  }, []);
 
-  // Automatically go to the next slide every 7.5 seconds
+  // Automatically go to the next slide every 15 seconds
   useEffect(() => {
     const slideInterval = setInterval(() => {
       nextSlide();
-    }, 7500);
+    }, 15000);  // Interval changed to 15 seconds
 
-    return () => clearInterval(slideInterval); // Cleanup the interval on component unmount
+    return () => clearInterval(slideInterval);  // Cleanup the interval on component unmount
   }, [currentSlide]);
 
   // Function to handle slideshow slide change
@@ -26,13 +35,61 @@ function HomePage() {
     setCurrentSlide((prev) => (prev - 1 + slides.length) % slides.length);
   };
 
+  // Handle the slide click (you can implement the redirect logic here)
+  const handleSlideClick = (packageId) => {
+    console.log(`Package clicked: ${packageId}`);
+    // Handle the click event, e.g., redirect to a package detail page
+  };
+
+  // Get the current slide's image and package details
+  const getSlideContent = (slide) => {
+    const image = slide.images && slide.images.length > 0 ? slide.images[0] : null;  // Get the lowest image id
+    const backgroundImage = image ? `url(${image})` : defaultColor;  // If no image, use default grey color
+    
+    return (
+      <Box
+        key={slide.package_id}
+        sx={{
+          minWidth: '100%',
+          height: '100vh',
+          display: 'flex',
+          justifyContent: 'center',
+          alignItems: 'center',
+          backgroundImage: backgroundImage === defaultColor ? 'none' : backgroundImage,
+          backgroundColor: backgroundImage === defaultColor ? defaultColor : 'transparent',
+          backgroundSize: 'cover',
+          backgroundPosition: 'center',
+          cursor: 'pointer',
+          position: 'relative',
+        }}
+        onClick={() => handleSlideClick(slide.package_id)}  // Make the slide clickable
+      >
+        {/* Position text next to the left arrow with no background */}
+        <Box
+          sx={{
+            position: 'absolute',
+            bottom: '50%',
+            left: '60px',  // Positioned to the right of the left arrow
+            transform: 'translateY(50%)',
+            color: 'white',
+            textAlign: 'left',
+          }}
+        >
+          <Typography variant="h4">{slide.description}</Typography>
+          <Typography variant="body1">Location: {slide.location || 'Unknown'}</Typography>
+          <Typography variant="body1">Price: ${slide.price}</Typography>
+          <Typography variant="body1">Duration: {slide.duration} days</Typography>
+        </Box>
+      </Box>
+    );
+  };
+
   return (
     <>
       {/* Slideshow Section */}
       <Box
         sx={{
           height: '100vh',
-          backgroundColor: colors[currentSlide],
           display: 'flex',
           justifyContent: 'center',
           alignItems: 'center',
@@ -40,7 +97,6 @@ function HomePage() {
           textAlign: 'center',
           position: 'relative',
           overflow: 'hidden',
-          transition: 'background-color 0.5s ease-in-out', // Smooth background color transition
         }}
       >
         {/* Left Arrow */}
@@ -77,22 +133,7 @@ function HomePage() {
               width: `${slides.length * 100}%`,
             }}
           >
-            {slides.map((slide, index) => (
-              <Box
-                key={index}
-                sx={{
-                  minWidth: '100%',
-                  display: 'flex',
-                  justifyContent: 'center',
-                  alignItems: 'center',
-                  height: '100vh',
-                }}
-              >
-                <Typography variant="h3" sx={{ mb: 2 }}>
-                  {slide}
-                </Typography>
-              </Box>
-            ))}
+            {slides.map((slide, index) => getSlideContent(slide))}
           </Box>
         </Box>
 

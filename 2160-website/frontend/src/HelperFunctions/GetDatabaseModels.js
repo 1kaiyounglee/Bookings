@@ -12,7 +12,8 @@ async function fetchDatabaseData(query) {
       });
   
       if (!response.ok) {
-        throw new Error("Network response was not ok");
+        console.log(`\n\n\nERROR: ${response.status}, ${response.text}\n\n\n`)
+        throw new Error("Network response was not ok:");
       }
   
       const data = await response.json();
@@ -61,34 +62,54 @@ export async function getUsers(whereClause = "") {
     return users; // Return the array of user objects
   }
 
-// Function to get all Packages data and transform it into a JSON object
+// Function to get the top 5 Packages data based on the number of orders
 export async function getPackages(whereClause = "") {
-  // Fetch the package data from the Packages table with optional conditions
-  const data = await getData("Packages", whereClause);
+  // Fetch the package data with the number of orders
+  const query = `
+    SELECT p.*, COUNT(o.order_id) AS order_count
+    FROM Packages p
+    LEFT JOIN Bookings b ON p.package_id = b.package_id
+    LEFT JOIN Orders o ON b.booking_id = o.order_id
+    GROUP BY p.package_id
+    ORDER BY order_count DESC
+    LIMIT 5
+  `;
+  
+  const data = await getData(query, whereClause);
 
   if (!data) {
-    return null; // Handle the case where no data is returned
+    console.log("\n\n\n DB RETURNED NOTHING!!!!!1 \n\n\n");
+    throw new Error("Database returned nothing");
   }
 
   // Fetch the related data for images, categories, and locations
-  const imagesData = await getData("PackageImages");
-  const categoriesData = await getData("PackageCategory");
-  const locationsData = await getData("Locations");
+  const imagesData = (await getData("PackageImages")) || []; // Default to empty array if null/undefined
+  const categoriesData = (await getData("PackageCategory")) || [];
+  const locationsData = (await getData("Locations")) || [];
 
   // Transform the data into a dictionary-like object (JSON format)
   const packages = data.map((pkg) => {
-    const relatedImages = imagesData.filter((img) => img.package_id === pkg.package_id);
+    // Get related images and sort them by image_id (flag if no images)
+    const relatedImages = imagesData
+      .filter((img) => img.package_id === pkg.package_id)
+      .sort((a, b) => a.image_id - b.image_id); // Sort by image_id (ascending)
+
+    const hasImages = relatedImages.length > 0;
+    const imagePaths = hasImages ? relatedImages.map((img) => img.image_path) : null; // Null if no images
+
+    // Get related categories and location (handle missing values)
     const relatedCategories = categoriesData.filter((cat) => cat.package_id === pkg.package_id);
     const relatedLocation = locationsData.find((loc) => loc.location_id === pkg.location_id);
 
     return {
       package_id: pkg.package_id,
-      description: pkg.description,
-      duration: pkg.duration,
-      price: pkg.price,
-      location: relatedLocation ? relatedLocation.location_name : null, // Include location name if available
-      images: relatedImages.map((img) => img.image_path), // Get paths of related images
-      categories: relatedCategories.map((cat) => cat.category_id) // Get related category IDs
+      description: pkg.description || "MISSING",  // Handle missing description
+      duration: pkg.duration || "MISSING",  // Handle missing duration
+      price: pkg.price || "MISSING",  // Handle missing price
+      location: relatedLocation ? relatedLocation.location_name : "MISSING",  // Handle missing location
+      images: imagePaths || [],  // Empty array for no images
+      hasImages: hasImages,  // Flag to indicate whether images exist
+      categories: relatedCategories.length > 0 ? relatedCategories.map((cat) => cat.category_id) : ["MISSING"]  // Handle missing categories
     };
   });
 
