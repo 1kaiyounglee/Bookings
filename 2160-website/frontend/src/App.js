@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { createTheme, ThemeProvider } from '@mui/material/styles';
-import { AppBar, Toolbar, Typography, Button, IconButton, Container, Box, Grid } from '@mui/material';
+import Grid2 from '@mui/material/Grid2'; // Grid2 is still in an unstable state
+
+import { AppBar, Toolbar, Typography, Button, IconButton, Container, Box } from '@mui/material';
 import { Menu as MenuIcon, ArrowBackIos, ArrowForwardIos } from '@mui/icons-material';
 import { deepPurple } from '@mui/material/colors';
 
@@ -159,23 +161,23 @@ function App() {
             Explore our services
           </Typography>
           {/* Manage Bookings and other options */}
-          <Grid container spacing={2}>
-            <Grid item xs={12} sm={6} md={4}>
-              <Button variant="contained" fullWidth>
-                Manage Bookings
-              </Button>
-            </Grid>
-            <Grid item xs={12} sm={6} md={4}>
-              <Button variant="contained" fullWidth>
-                Make a Booking
-              </Button>
-            </Grid>
-            <Grid item xs={12} sm={6} md={4}>
-              <Button variant="contained" fullWidth>
-                View Account
-              </Button>
-            </Grid>
-          </Grid>
+          <Grid2 container spacing={2}>
+          <Grid2 item xs={12} sm={6} md={4}>
+            <Button variant="contained" fullWidth>
+              Manage Bookings
+            </Button>
+          </Grid2>
+          <Grid2 item xs={12} sm={6} md={4}>
+            <Button variant="contained" fullWidth>
+              Make a Booking
+            </Button>
+          </Grid2>
+          <Grid2 item xs={12} sm={6} md={4}>
+            <Button variant="contained" fullWidth>
+              View Account
+            </Button>
+          </Grid2>
+        </Grid2>
 
           {/* Bottom Buttons for Contact and FAQs */}
           <Box sx={{ mt: 5, textAlign: 'center' }}>
