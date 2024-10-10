@@ -1,11 +1,11 @@
 import React from 'react';
 import { AppBar, Toolbar, Typography, Button, IconButton } from '@mui/material';
 import MenuIcon from '@mui/icons-material/Menu';
-import LogoutRoundedIcon from '@mui/icons-material/LogoutRounded'; // Import logout icon
+import LogoutIcon from '@mui/icons-material/Logout'; // Add Logout icon
 
 function Navbar({ onLoginRegisterClick, isLoggedIn, handleLogout }) {
   return (
-    <AppBar position="fixed"> {/* Changed position to fixed to keep it pinned */}
+    <AppBar position="static">
       <Toolbar>
         <IconButton size="large" edge="start" color="inherit" aria-label="menu" sx={{ mr: 2 }}>
           <MenuIcon />
@@ -15,16 +15,10 @@ function Navbar({ onLoginRegisterClick, isLoggedIn, handleLogout }) {
         </Typography>
         {isLoggedIn ? (
           <>
-            <IconButton
-              edge="end"
-              color="inherit"
-              aria-label="logout"
-              onClick={handleLogout}
-              sx={{ mr: 2 }} // Margin to the right of the logout button
-            >
-              <LogoutRoundedIcon />
-            </IconButton>
             <Button color="inherit">My Account</Button>
+            <IconButton color="inherit" onClick={handleLogout}>
+              <LogoutIcon />
+            </IconButton>
           </>
         ) : (
           <Button color="inherit" onClick={onLoginRegisterClick}>

@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
-import { Modal, Box, IconButton, Typography, TextField, Button, Checkbox, FormControlLabel } from '@mui/material';
+import { Modal, Box, IconButton, Typography, TextField, Button } from '@mui/material';
 import CloseRoundedIcon from '@mui/icons-material/CloseRounded'; // Rounded close icon
-import { Visibility, VisibilityOff } from '@mui/icons-material'; // Icons for show/hide password
+import { Visibility, VisibilityOff } from '@mui/icons-material'; // For password visibility
 import { Formik, Form, Field } from 'formik';
 import * as Yup from 'yup';
 import { registerUser, handleLogin } from '../HelperFunctions/SendData'; // Import both register and login functions
@@ -79,16 +79,18 @@ function LoginRegisterModal({ open, onClose, setIsLoggedIn }) {
 
         {isLogin ? (
           <Formik
-            initialValues={{ email: '', password: '', rememberMe: false }}
+            initialValues={{ email: '', password: '' }}
             validationSchema={validationSchemaLogin}
-            onSubmit={async (values, { setSubmitting, setErrors, resetForm }) => {
+            onSubmit={async (values, { setSubmitting, setErrors }) => {
               try {
                 // Call the login function
                 const result = await handleLogin(values);
                 if (!result.error) {
-                  // If login successful, close modal and set login state
+                  // Save JWT token to localStorage
+                  localStorage.setItem('jwt_token', result.access_token);
+
+                  // Set logged in state to true and close modal
                   setIsLoggedIn(true);
-                  resetForm(); // Reset the form to remove validation errors
                   onClose();
                 } else {
                   // Show login error on Formik form
@@ -113,41 +115,32 @@ function LoginRegisterModal({ open, onClose, setIsLoggedIn }) {
                   error={touched.email && Boolean(errors.email)}
                   helperText={touched.email && errors.email}
                 />
-
-                <Field
-                  as={TextField}
-                  name="password"
-                  type={showPassword ? 'text' : 'password'}
-                  label="Password"
-                  fullWidth
-                  margin="normal"
-                  InputLabelProps={{ style: { color: 'white' } }} // White label text
-                  InputProps={{
-                    style: { color: 'white' },
-                    endAdornment: (
-                      <IconButton onClick={togglePasswordVisibility} sx={{ color: 'white' }}>
-                        {showPassword ? <VisibilityOff /> : <Visibility />}
-                      </IconButton>
-                    ),
-                  }}
-                  error={touched.password && Boolean(errors.password)}
-                  helperText={touched.password && errors.password}
-                />
-
-                <FormControlLabel
-                  control={<Field as={Checkbox} name="rememberMe" />}
-                  label="Keep me logged in"
-                  sx={{ color: 'white' }} // White checkbox label
-                />
-
+                <Box sx={{ position: 'relative' }}>
+                  <Field
+                    as={TextField}
+                    name="password"
+                    type={showPassword ? 'text' : 'password'}
+                    label="Password"
+                    fullWidth
+                    margin="normal"
+                    InputLabelProps={{ style: { color: 'white' } }} // White label text
+                    InputProps={{ style: { color: 'white' } }} // White input text
+                    error={touched.password && Boolean(errors.password)}
+                    helperText={touched.password && errors.password}
+                  />
+                  <IconButton
+                    onClick={togglePasswordVisibility}
+                    sx={{ position: 'absolute', right: 8, top: 32, color: 'white' }}
+                  >
+                    {showPassword ? <VisibilityOff /> : <Visibility />}
+                  </IconButton>
+                </Box>
                 <Typography variant="body2" sx={{ mb: 2, color: 'lightblue', cursor: 'pointer' }}>
                   Forgot Password?
                 </Typography>
-
                 <Button type="submit" variant="contained" fullWidth disabled={isSubmitting}>
                   {isSubmitting ? 'Logging in...' : 'Login'}
                 </Button>
-
                 <Typography variant="body2" sx={{ mt: 2, textAlign: 'center', color: 'white' }}>
                   Don't have an account?{' '}
                   <span style={{ color: 'lightblue', cursor: 'pointer' }} onClick={toggleForm}>
@@ -164,7 +157,7 @@ function LoginRegisterModal({ open, onClose, setIsLoggedIn }) {
               lastName: '',
               email: '',
               password: '',
-              phone_number: '', // Corrected to phone_number for backend alignment
+              phone_number: '',
             }}
             validationSchema={validationSchemaRegister}
             onSubmit={async (values, { setSubmitting }) => {
@@ -222,26 +215,19 @@ function LoginRegisterModal({ open, onClose, setIsLoggedIn }) {
                 <Field
                   as={TextField}
                   name="password"
-                  type={showPassword ? 'text' : 'password'}
+                  type="password"
                   label="Password"
                   fullWidth
                   margin="normal"
                   InputLabelProps={{ style: { color: 'white' } }} // White label text
-                  InputProps={{
-                    style: { color: 'white' },
-                    endAdornment: (
-                      <IconButton onClick={togglePasswordVisibility} sx={{ color: 'white' }}>
-                        {showPassword ? <VisibilityOff /> : <Visibility />}
-                      </IconButton>
-                    ),
-                  }}
+                  InputProps={{ style: { color: 'white' } }} // White input text
                   error={touched.password && Boolean(errors.password)}
                   helperText={touched.password && errors.password}
                 />
                 <Field
                   as={TextField}
-                  name="phone_number" // Internal name is aligned with backend
-                  label="Phone Number" // Displayed label for user
+                  name="phone_number"
+                  label="Phone Number"
                   fullWidth
                   margin="normal"
                   InputLabelProps={{ style: { color: 'white' } }} // White label text

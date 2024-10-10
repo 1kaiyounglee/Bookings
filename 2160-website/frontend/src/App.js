@@ -1,9 +1,9 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { createTheme, ThemeProvider } from '@mui/material/styles';
 import { Box } from '@mui/material';
-import LoginRegisterModal from './Components/LoginRegisterModal'; // Import the modal
-import Navbar from './Components/Navbar'; // Import the Navbar
-import HomePage from './Pages/HomePage'; // Import the HomePage component
+import LoginRegisterModal from './Components/LoginRegisterModal';
+import Navbar from './Components/Navbar';
+import HomePage from './Pages/HomePage';
 import { deepPurple } from '@mui/material/colors';
 
 const darkTheme = createTheme({
@@ -14,35 +14,34 @@ const darkTheme = createTheme({
 });
 
 function App() {
-  const [modalOpen, setModalOpen] = useState(false); // Manage modal visibility
-  const [isLoggedIn, setIsLoggedIn] = useState(false); // Track if the user is logged in
+  const [modalOpen, setModalOpen] = useState(false); // Modal visibility
+  const [isLoggedIn, setIsLoggedIn] = useState(!!localStorage.getItem('jwt_token')); // JWT token check
 
-  // Function to open modal
+  // Watch for changes in `isLoggedIn` to close the modal and re-render navbar
+  useEffect(() => {
+    if (isLoggedIn) {
+      setModalOpen(false); // Close the modal after login
+    }
+  }, [isLoggedIn]);
+
+  const handleLogout = () => {
+    localStorage.removeItem('jwt_token'); // Remove token
+    setIsLoggedIn(false); // Set logged out state
+  };
+
   const openModal = () => {
     setModalOpen(true);
   };
 
-  // Function to close modal
   const closeModal = () => {
     setModalOpen(false);
-  };
-
-  // Handle user logout
-  const handleLogout = () => {
-    localStorage.removeItem('jwt_token'); // Clear the JWT token
-    setIsLoggedIn(false); // Set logged in state to false
   };
 
   return (
     <ThemeProvider theme={darkTheme}>
       <Box sx={{ flexGrow: 1 }}>
-        {/* Use the Navbar component */}
         <Navbar onLoginRegisterClick={openModal} isLoggedIn={isLoggedIn} handleLogout={handleLogout} />
-
-        {/* Routes */}
-        <HomePage /> {/* Show HomePage content */}
-        
-        {/* Login/Register Modal */}
+        <HomePage />
         <LoginRegisterModal open={modalOpen} onClose={closeModal} setIsLoggedIn={setIsLoggedIn} />
       </Box>
     </ThemeProvider>
