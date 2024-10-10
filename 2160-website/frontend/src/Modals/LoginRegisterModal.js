@@ -5,7 +5,6 @@ import { Formik, Form, Field } from 'formik';
 import * as Yup from 'yup';
 import { registerUser } from '../HelperFunctions/SendData'; // Import the registerUser function
 
-
 const modalStyle = {
   position: 'absolute',
   top: '50%',
@@ -28,7 +27,7 @@ const validationSchemaRegister = Yup.object({
   lastName: Yup.string().required('Required'),
   email: Yup.string().email('Invalid email').required('Required'),
   password: Yup.string().required('Required'),
-  phone_number: Yup.string().required('Required'),
+  phone_number: Yup.string().required('Required'), // Note that we now refer to phone_number internally
 });
 
 function LoginRegisterModal({ open, onClose }) {
@@ -127,19 +126,31 @@ function LoginRegisterModal({ open, onClose }) {
             )}
           </Formik>
         ) : (
-          <Formik
-            initialValues={{ firstName: '', lastName: '', email: '', password: '', phone_number: '' }}
+            <Formik
+            initialValues={{
+              firstName: '',
+              lastName: '',
+              email: '',
+              password: '',
+              phone_number: '', // Corrected to phone_number for backend alignment
+            }}
             validationSchema={validationSchemaRegister}
-            onSubmit={async (values, { setSubmitting, setErrors }) => {
-              // Handle registration logic
-              const result = await registerUser(values);
-              if (result.error) {
-                setErrors({ email: result.error }); // Assuming error is related to email, can be adjusted based on backend response
-              } else {
-                console.log('User registered successfully:', result);
-                onClose(); // Close modal after successful registration
+            onSubmit={async (values, { setSubmitting }) => {
+              try {
+                // Handle registration logic
+                const result = await registerUser(values);
+          
+                if (result.error) {
+                  console.error('Error:', result.error); // Log error in console only
+                } else {
+                  console.log('User registered successfully:', result);
+                  onClose(); // Close modal after successful registration
+                }
+              } catch (error) {
+                console.error('Unexpected error:', error); // Log unexpected errors
               }
-              setSubmitting(false);
+          
+              setSubmitting(false); // Stop the loading indicator after the submission
             }}
           >
             {({ errors, touched, isSubmitting }) => (
@@ -191,8 +202,8 @@ function LoginRegisterModal({ open, onClose }) {
                 />
                 <Field
                   as={TextField}
-                  name="Phone"
-                  label="Phone Number"
+                  name="phone_number" // Internal name is aligned with backend
+                  label="Phone Number" // Displayed label for user
                   fullWidth
                   margin="normal"
                   InputLabelProps={{ style: { color: 'white' } }} // White label text
@@ -212,6 +223,7 @@ function LoginRegisterModal({ open, onClose }) {
               </Form>
             )}
           </Formik>
+          
         )}
       </Box>
     </Modal>

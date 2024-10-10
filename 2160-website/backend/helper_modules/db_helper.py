@@ -71,9 +71,6 @@ def fetch_data(query, params=None):
         print(traceback.format_exc())
         return None
     
-
-
-
 def upsert_data(table_name, df):
     """
     Performs an UPSERT operation on the specified table using the data in the DataFrame.
@@ -89,7 +86,9 @@ def upsert_data(table_name, df):
         # Ensure all required columns (including those with defaults like is_admin) are in the DataFrame
         # Fetching the table metadata using SQLAlchemy to validate columns and apply defaults
         session = Session()
-        table_metadata = session.execute(f"PRAGMA table_info({table_name})").fetchall()
+        
+        # Wrapping the PRAGMA query in the text() function
+        table_metadata = session.execute(text(f"PRAGMA table_info({table_name})")).fetchall()
         session.close()
 
         table_columns = {col[1]: col for col in table_metadata}  # Dictionary of column names and info
@@ -135,24 +134,6 @@ def upsert_data(table_name, df):
     finally:
         session.close()
 
-def exec_cmd(sql_command):
-    """
-    Executes a given SQL command using SQLAlchemy.
-
-    Args:
-        sql_command (str): The SQL command to execute.
-    """
-    session = Session()
-    try:
-        # Use session.execute to run the raw SQL command
-        session.execute(text(sql_command))
-        session.commit()  # Commit if the command modifies the database (INSERT, UPDATE, DELETE, etc.)
-        print("SQL command executed successfully.")
-    except Exception as e:
-        session.rollback()  # Rollback in case of an error
-        print(f"An error occurred: {traceback.format_exc()}")
-    finally:
-        session.close()  # Always close the session
 
 
 def make_backup(tablename):

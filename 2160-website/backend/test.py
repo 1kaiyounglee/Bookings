@@ -3,4 +3,4 @@ from datetime import datetime
 data = db.fetch_data(query="SELECT * FROM Users")
 print(data)
 
-# ut.fetch_and_print_all_tables()
+# ut.update_user("hjgkgjhka2dgfhf@fdgh", "testesttestetestest", True)
