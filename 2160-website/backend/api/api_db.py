@@ -149,3 +149,43 @@ def update_booking():
     except Exception as e:
         return jsonify({"error": str(e)}), 500
     
+@api_db.route('/add_package', methods=['POST'])
+def add_package():
+    data = request.json
+    try:
+        # Insert the new package into the database
+        query = """
+        INSERT INTO Packages (package_id, name, description, location_id, duration, price)
+        VALUES (:package_id, :name, :description, :location_id, :duration, :price)
+        """
+        db.execute_query(query, data)
+        return jsonify({"message": "Package added successfully"}), 201
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
+@api_db.route('/update_package', methods=['POST'])
+def update_package():
+    data = request.json
+    try:
+        # Update the package details
+        query = """
+        UPDATE Packages
+        SET name = :name, description = :description, location_id = :location_id, 
+            duration = :duration, price = :price
+        WHERE package_id = :package_id
+        """
+        db.execute_query(query, data)
+        return jsonify({"message": "Package updated successfully"}), 200
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
+@api_db.route('/delete_package', methods=['POST'])
+def delete_package():
+    data = request.json
+    try:
+        # Delete the package from the database
+        query = "DELETE FROM Packages WHERE package_id = :package_id"
+        db.execute_query(query, data)
+        return jsonify({"message": "Package deleted successfully"}), 200
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
