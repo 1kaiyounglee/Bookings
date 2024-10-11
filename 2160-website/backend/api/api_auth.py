@@ -26,7 +26,13 @@ def login():
         if bcrypt.checkpw(password.encode('utf-8'), stored_hashed_password.encode('utf-8')):
             # Generate JWT token upon successful login
             access_token = create_access_token(identity=email, expires_delta=timedelta(days=30))
-            return jsonify(access_token=access_token), 200
+            user_data = {
+                "email"     : email,
+                "firstName" : user['first_name'].iloc[0],
+                "lastName"  : user['last_name'].iloc[0],
+                "isAdmin"   : bool(user['is_admin'].iloc[0])
+            }
+            return jsonify(access_token=access_token, user=user_data), 200
         else:
             return jsonify({"msg": "Invalid email or password."}), 401
     else:

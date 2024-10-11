@@ -111,9 +111,9 @@ def upsert_data(table_name, df):
 
         # Prepare the insert/update SQL
         columns = df.columns.tolist()
-        values = df.iloc[0].to_dict()  # Assuming one row; extend logic if multiple rows
+        values = df.iloc[0].to_dict()
 
-        # Build the SQL command with placeholders (let SQLAlchemy handle the type conversion)
+        # Build SQL query
         column_names = ', '.join(columns)
         value_placeholders = ', '.join([f":{col}" for col in columns])
 
@@ -121,7 +121,7 @@ def upsert_data(table_name, df):
         conflict_target = columns[0]
         set_clause = ', '.join([f"{col} = :{col}" for col in columns if col != conflict_target])
 
-        # Construct the full UPSERT SQL command with placeholders
+        # Construct the UPSERT SQL command
         cmd_text = f"""
         INSERT INTO {table_name} ({column_names})
         VALUES ({value_placeholders})
@@ -135,6 +135,7 @@ def upsert_data(table_name, df):
 
         print("UPSERT operation completed successfully.")
         return True
+
     except Exception as e:
         if session:
             session.rollback()  # Rollback in case of error
@@ -144,6 +145,7 @@ def upsert_data(table_name, df):
         if session:
             session.close()
 
+  
 
 
 def make_backup(tablename):

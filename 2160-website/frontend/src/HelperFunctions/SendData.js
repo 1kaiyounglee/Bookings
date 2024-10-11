@@ -38,6 +38,10 @@ export async function handleLogin(values) {
   
   if (response.ok) {
     localStorage.setItem('jwt_token', data.access_token);  // Store the JWT token in LocalStorage
+    localStorage.setItem('email', data.user.email);
+    localStorage.setItem('first_name', data.user.firstName);
+    localStorage.setItem('last_name', data.user.lastName);
+    localStorage.setItem('is_admin', data.user.isAdmin);
     console.log('User logged in successfully');
     return data;  // Return data for successful login
   } else {
