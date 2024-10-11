@@ -122,3 +122,75 @@ export async function updateBooking(bookingId, status) {
 
   return await response.json();
 }
+
+export async function updateCartItem(item, newStartDate, newEndDate, newTravellers) {
+  try {
+    // Fetch the booking item by booking ID
+    const bookings = await getData("Bookings", `booking_id = ${item.bookingId}`);
+    if (!bookings || bookings.length === 0) {
+      throw new Error('Booking not found');
+    }
+
+    const booking = bookings[0];  // Get the first booking item (assuming one exists)
+    console.log("Original booking data:", booking);
+
+    // Update the booking with new data (start date, end date, travelers, etc.)
+    const updatedBookingData = {
+      booking_id:item.bookingId,
+      email: booking.email,
+      package_id: item.packageId,
+      start_date: newStartDate.toISOString().split('T')[0],
+      end_date: newEndDate.toISOString().split('T')[0],
+      number_of_travellers: newTravellers,
+      price: item.price * newTravellers,
+      status: 'in-cart',
+    };
+
+    const response = await fetch('http://localhost:5000/api/database/update_booking', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(updatedBookingData),
+    });
+
+    if (!response.ok) {
+      throw new Error('Failed to update cart item');
+    }
+
+    return await response.json();  // Return the response data
+  } catch (error) {
+    console.error('Error updating cart item:', error);
+    throw error;
+  }
+}
+
+export async function removeCartItem(bookingId) {
+  try {
+    // Fetch the booking item by booking ID
+    const bookings = await getData("Bookings", `booking_id = ${bookingId}`);
+    if (!bookings || bookings.length === 0) {
+      throw new Error('Booking not found');
+    }
+
+    console.log("Deleting booking:", bookings[0]);
+
+    // Call the backend to delete the booking
+    const response = await fetch('http://localhost:5000/api/database/delete_booking', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ booking_id: bookingId }),
+    });
+
+    if (!response.ok) {
+      throw new Error('Failed to delete cart item');
+    }
+
+    return await response.json();  // Return the response data
+  } catch (error) {
+    console.error('Error deleting cart item:', error);
+    throw error;
+  }
+}

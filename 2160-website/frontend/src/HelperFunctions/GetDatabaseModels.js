@@ -139,7 +139,6 @@ export async function getUserOrders(email) {
   `;
 
   const data = await fetchDatabaseData(query);
-  console.log(data); // Add this to see the raw data from the database
   
   if (!data || data.length === 0) {
     return [];
@@ -164,7 +163,6 @@ export async function getUserOrders(email) {
 
     const relatedImages = imagesData.filter((img) => img.package_id === row.package_id);
     const firstImage = relatedImages.length > 0 ? `/backend/images/${relatedImages[0].image_path}` : null;
-    console.log(firstImage)
 
     // Add each item to the corresponding order
     ordersMap[orderId].items.push({
@@ -183,6 +181,51 @@ export async function getUserOrders(email) {
   });
 
   return Object.values(ordersMap);
+}
+
+export async function getCartItems(email) {
+  const query = `
+    SELECT b.booking_id, b.package_id, b.start_date, b.end_date, b.number_of_travellers,
+           p.name, p.duration, p.price,
+           l.country, l.city
+    FROM Bookings b
+    JOIN Packages p ON b.package_id = p.package_id
+    JOIN Locations l ON p.location_id = l.location_id
+    WHERE b.email = '${email}' AND b.status = 'in-cart'
+    ORDER BY b.start_date ASC
+  `;
+
+  // Fetch the main cart data
+  const data = await fetchDatabaseData(query);
+  if (!data || data.length === 0) {
+    return [];
+  }
+
+  // Fetch the related images for packages
+  const imagesData = (await getData("PackageImages")) || [];
+
+  // Prepare cart items
+  const cartItems = data.map(row => {
+    // Find related images for the package
+    const relatedImages = imagesData.filter(img => img.package_id === row.package_id);
+    const firstImage = relatedImages.length > 0 ? `/backend/images/${relatedImages[0].image_path}` : null;
+
+    // Return the formatted item
+    return {
+      bookingId: row.booking_id,               // The ID of the booking
+      packageId: row.package_id,               // The ID of the package
+      packageName: row.name,                   // The name of the package
+      location: `${row.city}, ${row.country}`, // Combining the city and country
+      duration: row.duration,                  // Duration of the package
+      startDate: row.start_date,               // The start date of the booking
+      endDate: row.end_date,                   // The end date of the booking
+      price: row.price,                        // Price of the package
+      travellers: row.number_of_travellers,    // Number of travellers for this booking
+      image: firstImage                        // The image associated with the package
+    };
+  });
+
+  return cartItems;
 }
 
 export async function getPackagesGeneral(whereClause = "") {
