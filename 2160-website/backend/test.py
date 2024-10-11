@@ -22,6 +22,5 @@ ORDER BY o.order_date DESC,
 """
 data = db.fetch_data(query1)
 print(data)
-# ut.fetch_and_print_all_tables()
-# ut.update_admin('austingod1@gmail.com')
+ut.update_admin('austingod1@gmail.com')
 # ut.fetch_and_print_all_tables()

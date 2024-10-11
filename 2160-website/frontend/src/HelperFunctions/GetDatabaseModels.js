@@ -60,7 +60,7 @@ export async function getUsers(whereClause = "") {
     }));
   
     return users; // Return the array of user objects
-  }
+}
 
   // Function to get the top 5 Packages data for the homepage
 export async function getPackages() {
@@ -243,4 +243,41 @@ export async function getPackagesGeneral(whereClause = "") {
   });
 
   return packages;
+}
+
+export async function getBookings() {
+  // Fetch the bookings data from the Bookings table
+  const bookingsData = await getData("Bookings");
+
+  if (!bookingsData) {
+      console.log("\n\n\n DB RETURNED NOTHING FOR BOOKINGS!!! \n\n\n");
+      throw new Error("Database returned nothing for bookings.");
+  }
+
+  // Fetch related data: Users and Packages tables
+  const usersData = await getData("Users") || [];
+  const packagesData = await getData("Packages") || [];
+
+  // Transform the data into a detailed bookings object
+  const bookings = bookingsData.map((booking) => {
+      // Get related user data (find user by email)
+      const user = usersData.find((usr) => usr.email === booking.email) || {};
+
+      // Get related package data (find package by package_id)
+      const packageInfo = packagesData.find((pkg) => pkg.package_id === booking.package_id) || {};
+
+      return {
+          booking_id: booking.booking_id,
+          email: booking.email,
+          user_name: `${user.first_name || "Unknown"} ${user.last_name || ""}`.trim(),
+          package_id: booking.package_id,
+          package_name: packageInfo.name || "Unknown Package",  // Use package name instead of package_id
+          start_date: booking.start_date,
+          end_date: booking.end_date,
+          number_of_travellers: booking.number_of_travellers || 0,
+          price: booking.price || "N/A",
+          status: booking.status || "pending", // Default to 'pending' if status is missing
+      };
+  });
+  return bookings;
 }
