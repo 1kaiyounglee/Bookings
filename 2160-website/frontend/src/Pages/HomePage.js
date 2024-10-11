@@ -1,30 +1,100 @@
 import React, { useState, useEffect } from 'react';
-import { Container, Box, IconButton, Button } from '@mui/material';
+import { Container, Box, IconButton, Typography, Button } from '@mui/material';
 import { ArrowBackIos, ArrowForwardIos } from '@mui/icons-material';
-import { Typography } from '@mui/material';
+import { getPackages } from '../HelperFunctions/GetDatabaseModels';  // Import the function that fetches packages
+import { useNavigate } from 'react-router-dom';
+
 
 function HomePage() {
   const [currentSlide, setCurrentSlide] = useState(0);
-  const slides = ['Popular Package 1', 'Popular Package 2', 'Popular Package 3', 'Popular Package 4'];
-  const colors = ['#1abc9c', '#3498db', '#9b59b6', '#e74c3c']; // Background colors for each slide
+  const [slides, setSlides] = useState([]);  // Store package data
+  const defaultColor = '#2e2e2e';  // Default grey color for packages with no image
+  
+  // Fetch packages when the component mounts
+  useEffect(() => {
+    async function fetchPackages() {
+      const packages = await getPackages();
+      console.log(packages);
+      setSlides(packages || []);  // Set the slides to be the packages or an empty array if none
+    }
+    fetchPackages();
+  }, []);
 
-  // Automatically go to the next slide every 7.5 seconds
+  // Automatically go to the next slide every 15 seconds
   useEffect(() => {
     const slideInterval = setInterval(() => {
       nextSlide();
-    }, 7500);
+    }, 15000);  // Interval changed to 15 seconds
 
-    return () => clearInterval(slideInterval); // Cleanup the interval on component unmount
+    return () => clearInterval(slideInterval);  // Cleanup the interval on component unmount
   }, [currentSlide]);
 
   // Function to handle slideshow slide change
   const nextSlide = () => {
     setCurrentSlide((prev) => (prev + 1) % slides.length);
   };
-
+  
   const prevSlide = () => {
     setCurrentSlide((prev) => (prev - 1 + slides.length) % slides.length);
   };
+
+  // Handle the slide click (you can implement the redirect logic here)
+  const handleSlideClick = (packageId) => {
+    console.log(`Package clicked: ${packageId}`);
+    // Handle the click event, e.g., redirect to a package detail page
+  };
+
+  const getSlideContent = (slide) => {
+    const image = slide.images && slide.images.length > 0 ? `http://localhost:5000${slide.images[0]}` : null;
+    const backgroundImage = image ? `url(${image})` : defaultColor;
+    
+    return (
+      <Box
+        key={slide.package_id}
+        sx={{
+          minWidth: '100%',
+          height: '100vh',
+          display: 'flex',
+          justifyContent: 'center',
+          alignItems: 'center',
+          backgroundImage: backgroundImage === defaultColor ? 'none' : backgroundImage,
+          backgroundSize: 'cover',
+          backgroundPosition: 'center',
+          backgroundRepeat: 'no-repeat',
+          cursor: 'pointer',
+          position: 'relative',
+        }}
+        onClick={() => handleSlideClick(slide.package_id)}
+      >
+        {/* Text Box with Background */}
+        <Box
+          sx={{
+            position: 'absolute',
+            left: '60px',
+            display: 'flex',
+            flexDirection: 'column', // Stack title and details vertically
+            justifyContent: 'center',
+            color: 'white',
+            padding: '10px', // Add padding for spacing
+            backgroundColor: 'rgba(0, 0, 0, 0.5)', // Transparent grey background
+            borderRadius: '8px', // Slightly rounded corners
+            textAlign: 'left',
+          }}
+        >
+          {/* Package Title */}
+          <Typography variant="h4" sx={{ marginBottom: '8px', fontWeight: 'bold' }}>
+            {slide.name}
+          </Typography>
+          {/* Package Location and Duration */}
+          <Typography variant="body1">Location: {slide.location || 'Unknown'}</Typography>
+          <Typography variant="body1">Duration: {slide.duration} days</Typography>
+        </Box>
+      </Box>
+    );
+};
+
+  
+  
 
   return (
     <>
@@ -32,7 +102,6 @@ function HomePage() {
       <Box
         sx={{
           height: '100vh',
-          backgroundColor: colors[currentSlide],
           display: 'flex',
           justifyContent: 'center',
           alignItems: 'center',
@@ -40,7 +109,6 @@ function HomePage() {
           textAlign: 'center',
           position: 'relative',
           overflow: 'hidden',
-          transition: 'background-color 0.5s ease-in-out', // Smooth background color transition
         }}
       >
         {/* Left Arrow */}
@@ -77,22 +145,7 @@ function HomePage() {
               width: `${slides.length * 100}%`,
             }}
           >
-            {slides.map((slide, index) => (
-              <Box
-                key={index}
-                sx={{
-                  minWidth: '100%',
-                  display: 'flex',
-                  justifyContent: 'center',
-                  alignItems: 'center',
-                  height: '100vh',
-                }}
-              >
-                <Typography variant="h3" sx={{ mb: 2 }}>
-                  {slide}
-                </Typography>
-              </Box>
-            ))}
+            {slides.map((slide) => getSlideContent(slide))}
           </Box>
         </Box>
 
@@ -129,26 +182,7 @@ function HomePage() {
         </Box>
       </Box>
 
-      {/* Bottom Buttons for Contact and FAQs */}
-      <Container sx={{ mt: 5, textAlign: 'center' }}>
-        <Box
-          sx={{
-            backgroundColor: '#2e2e2e',
-            padding: '10px',  // Reduce padding to make the box smaller
-            margin: 'auto',
-            width: 'fit-content', // Make the width fit the content
-            borderRadius: '8px', // Optional: Rounded corners for a nicer look
-            textAlign: 'center',
-          }}
-        >
-          <Button variant="outlined" sx={{ m: 2, color: 'white', borderColor: 'white' }}>
-            Contact Us
-          </Button>
-          <Button variant="outlined" sx={{ m: 2, color: 'white', borderColor: 'white' }}>
-            FAQs
-          </Button>
-        </Box>
-      </Container>
+     
     </>
   );
 }

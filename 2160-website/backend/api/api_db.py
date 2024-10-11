@@ -27,6 +27,7 @@ def execute_query():
             return jsonify({'message': 'No data found.'}), 404
 
     except Exception as e:
+        print(str(e))
         return jsonify({'error': str(e)}), 500
 
 
@@ -69,3 +70,4 @@ def create_user():
 
     except Exception as e:
         return jsonify({'error': str(e)}), 500
+

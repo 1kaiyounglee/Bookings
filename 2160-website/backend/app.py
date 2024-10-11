@@ -1,4 +1,4 @@
-from flask import Flask, jsonify
+from flask import Flask, jsonify, send_from_directory
 import sys
 import os
 from flask_jwt_extended import JWTManager
@@ -21,6 +21,14 @@ jwt = JWTManager(app)
 # Register blueprints for database and authentication
 app.register_blueprint(api_db, url_prefix="/api/database")
 app.register_blueprint(auth_bp, url_prefix="/api/auth")  # Register auth blueprint
+
+
+# Serve images from the backend/images folder
+@app.route('/backend/images/<path:filename>')
+def serve_image(filename):
+    return send_from_directory(os.path.join(app.root_path, 'images'), filename)
+
+
 
 if __name__ == "__main__":
     app.run(debug=True)
