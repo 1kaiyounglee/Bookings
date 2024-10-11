@@ -4,11 +4,16 @@ import MenuIcon from '@mui/icons-material/Menu';
 import LogoutIcon from '@mui/icons-material/Logout';
 import { useNavigate } from 'react-router-dom';
 
-function Navbar({ onLoginRegisterClick, isLoggedIn, handleLogout, isAdmin }) {
+function Navbar({ onLoginRegisterClick, isLoggedIn, handleLogout, user }) {
   const navigate = useNavigate();
+
   const handleBookingsClick = () => {
-    navigate('/bookings')
-  }
+    navigate('/bookings');
+  };
+
+  const handleAdminPanelClick = () => {
+    navigate('/admin');  // Navigate to the Admin Panel page
+  };
 
   return (
     <AppBar position="static">
@@ -27,6 +32,11 @@ function Navbar({ onLoginRegisterClick, isLoggedIn, handleLogout, isAdmin }) {
             <Button color="inherit" onClick={handleBookingsClick}>
               {user.firstName} {user.lastName}
             </Button>
+            {user.isAdmin && (
+              <Button color="inherit" onClick={handleAdminPanelClick}>  {/* Admin Panel button, visible only if user is admin */}
+                Admin Panel
+              </Button>
+            )}
             <IconButton color="inherit" onClick={handleLogout}>
               <LogoutIcon />
             </IconButton>

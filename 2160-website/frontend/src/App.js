@@ -1,13 +1,13 @@
 import React, { useState, useEffect } from 'react';
 import { createTheme, ThemeProvider } from '@mui/material/styles';
 import { Box, CircularProgress, Backdrop } from '@mui/material';
-import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';  // Import necessary components for routing
+import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
 import LoginModal from './Components/LoginModal';
 import RegisterModal from './Components/RegisterModal';
 import Navbar from './Components/Navbar';
 import HomePage from './Pages/HomePage';
-import MyBookings from './Pages/MyBookings'
-import PackageDetails from './Pages/PackageDetails';  // Import PackageDetails page
+import MyBookings from './Pages/MyBookings';
+import PackageDetails from './Pages/PackageDetails';
 import AdminPanel from './Pages/AdminPanel';  // Import AdminPanel page
 import { deepPurple } from '@mui/material/colors';
 
@@ -25,15 +25,15 @@ function App() {
     email      : '',
     firstName  : '',
     lastName   : ''
-  })
+  });
 
-  const [isLoginOpen, setIsLoginOpen] = useState(false);  // Initially modals are closed
+  const [isLoginOpen, setIsLoginOpen] = useState(false);
   const [isRegisterOpen, setIsRegisterOpen] = useState(false);
-  const [loading, setLoading] = useState(false); // Loading state for the whole page
+  const [loading, setLoading] = useState(false);
 
   useEffect(() => {
     if (user.isLoggedIn) {
-      setIsLoginOpen(false);  // Ensure modals close after login
+      setIsLoginOpen(false);  
       setIsRegisterOpen(false);
     }
   }, [user.isLoggedIn]);
@@ -43,7 +43,7 @@ function App() {
     if (token) {
       setUser({
         isLoggedIn: true,
-        isAdmin: localStorage.getItem('is_admin') === 'true',  // Stored as a string in localStorage
+        isAdmin: localStorage.getItem('is_admin') === 'true',
         firstName: localStorage.getItem('first_name'),
         lastName: localStorage.getItem('last_name'),
         email: localStorage.getItem('email'),
@@ -53,28 +53,27 @@ function App() {
 
   const handleLogout = () => {
     localStorage.removeItem('jwt_token');
-    setUser({ isLoggedIn: false, isAdmin: false, firstName: '', lastName: '', email: ''});
+    setUser({ isLoggedIn: false, isAdmin: false, firstName: '', lastName: '', email: '' });
   };
 
   const openLoginModal = () => {
-    setIsLoginOpen(true);  // Open login modal
-    setIsRegisterOpen(false);  // Ensure register modal is closed
+    setIsLoginOpen(true);
+    setIsRegisterOpen(false);
   };
 
   const closeLoginModal = () => {
-    setIsLoginOpen(false);  // Close login modal
+    setIsLoginOpen(false);
   };
 
   const openRegisterModal = () => {
-    setIsRegisterOpen(true);  // Open register modal
-    setIsLoginOpen(false);  // Close login modal
+    setIsRegisterOpen(true);
+    setIsLoginOpen(false);
   };
 
   const closeRegisterModal = () => {
-    setIsRegisterOpen(false);  // Close register modal
+    setIsRegisterOpen(false);
   };
 
-  // Function to handle setting loading state for the entire page during login
   const handleSetLoading = (isLoading) => {
     setLoading(isLoading);
   };
@@ -91,42 +90,40 @@ function App() {
 
   return (
     <ThemeProvider theme={darkTheme}>
-      <Router>  {/* Wrap the entire app in a Router component */}
+      <Router>
         <Box sx={{ flexGrow: 1 }}>
-          {/* Loading overlay for the whole page */}
           <Backdrop open={loading} sx={{ zIndex: (theme) => theme.zIndex.drawer + 1 }}>
             <CircularProgress color="inherit" />
           </Backdrop>
 
           <Navbar
-            onLoginRegisterClick={openLoginModal}  // Open login modal when button clicked
+            onLoginRegisterClick={openLoginModal}
             handleLogout={handleLogout}
             user={user}
           />
 
-          {/* Define the Routes to different pages */}
+          {/* Define the Routes */}
           <Routes>
-            <Route path="/" element={<HomePage />} />  {/* Default Home Page */}
-            <Route path="/package/:packageId" element={<PackageDetails />} />  {/* Route for package details */}
-            <Route path="/bookings" element={<MyBookings />} />  {/* Bookings Page */}
+            <Route path="/" element={<HomePage />} />
+            <Route path="/package/:packageId" element={<PackageDetails />} />
+            <Route path="/bookings" element={<MyBookings />} />
+            {user.isAdmin && <Route path="/admin" element={<AdminPanel />} />}  {/* Admin route */}
           </Routes>
 
-          {/* Modal for login */}
           <LoginModal
-            open={isLoginOpen}  // Modal is closed by default
-            onClose={closeLoginModal}  // Close login modal
+            open={isLoginOpen}
+            onClose={closeLoginModal}
             setIsLoggedIn={handleLoginSuccess}
-            onRegisterClick={openRegisterModal}  // Open register modal from login
-            setLoading={handleSetLoading}  // Set loading state for the entire page during login
+            onRegisterClick={openRegisterModal}
+            setLoading={handleSetLoading}
           />
 
-          {/* Modal for register */}
           <RegisterModal
-            open={isRegisterOpen}  // Modal is closed by default
-            onClose={closeRegisterModal}  // Close register modal
+            open={isRegisterOpen}
+            onClose={closeRegisterModal}
           />
         </Box>
-      </Router>  {/* Close the Router component */}
+      </Router>
     </ThemeProvider>
   );
 }
