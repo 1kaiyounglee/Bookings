@@ -49,7 +49,7 @@ function MyBookings({ user }) {
           <OrderHistory key={index} order={order} handlePackageClick={handlePackageClick} />
         ))
       ) : (
-        <Typography>No orders found.</Typography>
+        <Typography sx={{ textAlign: 'center'}}>No orders found.</Typography>
       )}
     </Box>
   );
@@ -84,7 +84,7 @@ const formatDate = (dateString) => {
 const OrderItem = ({ item, handlePackageClick }) => (
   <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 2, padding: '10px', border: '2px solid #ccc', borderRadius: '8px' }}>
     {/* Package Image */}
-    <Box sx={{ width: '275px', height: '150px', backgroundColor: '#e0e0e0', mr: 3 }}>
+    <Box sx={{ width: '275px', height: '150px', overflow: 'hidden', mr: 3 }}>
       {item.image ? (
         <img
           src={`http://localhost:5000${item.image}`}

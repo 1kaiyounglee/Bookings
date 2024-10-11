@@ -5,7 +5,12 @@ from db_config import engine, Session
 from datetime import datetime, timedelta
 
 
-# Step 4: Create the Database and Tables from Scratch
+def reset_database():
+    from models import Base  # Ensure that the Base is imported from the correct location
+    Base.metadata.drop_all(engine)  # Drop all tables if they exist
+    print("Database wiped!")
+
+
 def setup_database():
     from models import Base  # Ensure that the Base is imported from the correct location
     Base.metadata.create_all(engine)  # This creates all tables defined
@@ -66,6 +71,7 @@ def insert_sample_data():
         Bookings(email="jettv224@gmail.com", package_id=3, start_date=datetime.now(), end_date=datetime.now() + timedelta(days=4), number_of_travellers=4, price=699.99, status='confirmed'),
         Bookings(email="jettv224@gmail.com", package_id=5, start_date=datetime.now(), end_date=datetime.now() + timedelta(days=4), number_of_travellers=4, price=699.99, status='pending'),
         Bookings(email="jettv224@gmail.com", package_id=7, start_date=datetime.now(), end_date=datetime.now() + timedelta(days=4), number_of_travellers=4, price=699.99, status='cancelled'),
+        Bookings(email="jettv224@gmail.com", package_id=4, start_date=datetime.now(), end_date=datetime.now() + timedelta(days=7), number_of_travellers=3, price=699.99, status='in-cart'),
         Bookings(email="john.doe@example.com", package_id=1, start_date=datetime.now(), end_date=datetime.now() + timedelta(days=3), number_of_travellers=2, price=499.99, status='confirmed'),
         Bookings(email="jane.smith@example.com", package_id=2, start_date=datetime.now(), end_date=datetime.now() + timedelta(days=5), number_of_travellers=1, price=899.99, status='pending'),
         Bookings(email="alice.wonderland@example.com", package_id=3, start_date=datetime.now(), end_date=datetime.now() + timedelta(days=4), number_of_travellers=4, price=699.99, status='confirmed'),
@@ -155,5 +161,6 @@ def insert_sample_data():
     print("Sample data inserted into all tables!")
 
 if __name__ == "__main__":
+    reset_database()
     setup_database()  # Create the database and tables
     insert_sample_data()  # Insert initial data if necessary

@@ -3,6 +3,7 @@ import { AppBar, Toolbar, Typography, Button, Box, Tooltip, IconButton } from '@
 import LogoutIcon from '@mui/icons-material/Logout';
 import AdminPanelSettingsRoundedIcon from '@mui/icons-material/AdminPanelSettingsRounded';
 import AccountCircleRoundedIcon from '@mui/icons-material/AccountCircleRounded'; // Import the account icon
+import ShoppingCartRoundedIcon from '@mui/icons-material/ShoppingCartRounded';
 import { useNavigate } from 'react-router-dom';
 
 function Navbar({ onLoginRegisterClick, isLoggedIn, handleLogout, user }) {
@@ -24,6 +25,14 @@ function Navbar({ onLoginRegisterClick, isLoggedIn, handleLogout, user }) {
     navigate('/account'); // Add your account route if applicable
   };
 
+  const handleCartClick = () => {
+    navigate('/cart');
+  }
+
+  const handleLogOutClick = () => {
+    navigate('/');
+  }
+
   return (
     <AppBar position="static">
       <Toolbar sx={{ justifyContent: 'space-between' }}>
@@ -38,9 +47,9 @@ function Navbar({ onLoginRegisterClick, isLoggedIn, handleLogout, user }) {
             <Button color="inherit" onClick={handleBookingsClick}>
               My Bookings
             </Button>
-            <Tooltip title="My Account">
-              <IconButton color="inherit" onClick={handleAccountClick}>
-                <AccountCircleRoundedIcon />
+            <Tooltip title="Cart">
+              <IconButton color="inherit" onClick={handleCartClick}>
+                <ShoppingCartRoundedIcon />
               </IconButton>
             </Tooltip>
             {user.isAdmin && (
@@ -50,8 +59,16 @@ function Navbar({ onLoginRegisterClick, isLoggedIn, handleLogout, user }) {
                 </IconButton>
               </Tooltip>
             )}
+            <Tooltip title="My Account">
+              <IconButton color="inherit" onClick={handleAccountClick}>
+                <AccountCircleRoundedIcon />
+              </IconButton>
+            </Tooltip>            
             <Tooltip title="Logout">
-              <IconButton color="inherit" onClick={handleLogout}>
+              <IconButton color="inherit" onClick={() => {
+                handleLogOutClick();  // Navigate to home
+                handleLogout();       // Perform logout actions (e.g., clearing user data)
+              }}>
                 <LogoutIcon />
               </IconButton>
             </Tooltip>

@@ -117,3 +117,4 @@ def update_booking():
             return jsonify({"message": "Failed to update booking"}), 500
     except Exception as e:
         return jsonify({"error": str(e)}), 500
+    
