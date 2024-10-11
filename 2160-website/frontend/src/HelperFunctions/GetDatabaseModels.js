@@ -121,7 +121,7 @@ export async function getPackages() {
 export async function getPackagesGeneral(whereClause = "") {
   // Build the base query with a dynamic WHERE clause
   const query = `
-    SELECT p.package_id, p.name, p.description, p.duration, p.price, l.city AS location
+    SELECT p.package_id, p.name, p.description, p.duration, p.price, l.city AS location_city, l.country AS location_country
     FROM Packages p
     LEFT JOIN Locations l ON p.location_id = l.location_id
     ${whereClause ? `WHERE ${whereClause}` : ''}
@@ -157,7 +157,8 @@ export async function getPackagesGeneral(whereClause = "") {
       description: pkg.description || "MISSING",
       duration: pkg.duration || "MISSING",
       price: pkg.price || "MISSING",
-      location: pkg.location || "MISSING", // Ensure the location is included
+      location_city: pkg.location_city || "MISSING",
+      location_country: pkg.location_country || "MISSING",
       images: imagePaths || [],
       hasImages: hasImages,
       categories: relatedCategories.length > 0 ? relatedCategories.map((cat) => cat.category_id) : ["MISSING"]
@@ -166,8 +167,3 @@ export async function getPackagesGeneral(whereClause = "") {
 
   return packages;
 }
-
-  
-
-
-

@@ -72,7 +72,9 @@ function PackageDetails() {
         <ArrowBackIos onClick={() => window.history.back()} style={{ cursor: 'pointer' }} />
         <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
           <Typography variant="h4" sx={{ fontWeight: 'bold', mb: 2 }}>{packageData.name}</Typography>
-          <Typography variant="h6" sx={{ mb: 3 }}>{packageData.location}</Typography>
+          <Typography variant="h6" sx={{ mb: 3 }}>
+            {packageData.location_city}, {packageData.location_country}  {/* Display city and country */}
+          </Typography>
 
           {/* Display images in a row */}
           <Box sx={{ display: 'flex', gap: 2, justifyContent: 'center', mb: 3 }}>
