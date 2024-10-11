@@ -72,25 +72,29 @@ def create_user():
         return jsonify({'error': str(e)}), 500
 
 # Route to update or insert user admin status
-@api_db.route('/api/update_user', methods=['POST'])
+@api_db.route('/update_user', methods=['POST'])
 def update_user():
     data = request.json
     try:
         user_data = {
             'email': data['email'],
+            'phone_number':data['phone_number'],
+            'first_name':data['first_name'],
+            'last_name':data['last_name'],
             'is_admin': data['is_admin']
         }
-        success = db.upsert_data('Users', user_data)
+        df = pd.DataFrame([user_data])
+        success = db.upsert_data('Users', df)
         if success:
             return jsonify({"message": "User updated successfully"}), 200
         else:
-            return jsonify({"message": "Failed to update user"}), 500
+            return jsonify({"message": f"Failed to update user {user_data}"}), 500
     except Exception as e:
         return jsonify({"error": str(e)}), 500
 
 
 # Route to update or insert booking status
-@api_db.route('/api/update_booking', methods=['POST'])
+@api_db.route('/update_booking', methods=['POST'])
 def update_booking():
     data = request.json
     try:

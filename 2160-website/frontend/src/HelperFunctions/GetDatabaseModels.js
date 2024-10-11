@@ -60,7 +60,7 @@ export async function getUsers(whereClause = "") {
     }));
   
     return users; // Return the array of user objects
-  }
+}
 
   // Function to get the top 5 Packages data for the homepage
 export async function getPackages() {

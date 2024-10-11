@@ -1,3 +1,8 @@
+import { getData } from './GetDatabaseModels';  // Import the getUsers function
+
+
+
+
 export const registerUser = async (values) => {
     try {
       const response = await fetch('http://localhost:5000/api/database/create_user', {
@@ -52,26 +57,41 @@ export async function handleLogin(values) {
 
 
 export async function updateAdmin(email, isAdmin) {
-  // Define the user data for UPSERT
-  const userData = {
-      email: email,
-      is_admin: isAdmin ? 1 : 0
-  };
+  try {
+    // Fetch all users using the getUsers function and find the specific user by email
+    const users = await getData("Users",`email = '${email}'`);
+    if (!users || users.length === 0) {
+      throw new Error('User not found');
+    }
+    
+    const user = users[0];  // Get the first user (assuming there's only one with the given email)
+    console.log("askldsakldlaskdjklsa", user);
+    // Update the isAdmin field while keeping other fields intact
+    const updatedUserData = {
+      ...user,
+      is_admin: isAdmin ? true : false,  // Update the isAdmin field to match the new value
+    };
 
-  // Call the UPSERT endpoint for users
-  const response = await fetch('http://localhost:5000/api/update_user', {
+    console.log('Sending updated user data:', updatedUserData);  // Log the data being sent to the backend
+
+    // Call the UPSERT endpoint for users
+    const response = await fetch('http://localhost:5000/api/database/update_user', {
       method: 'POST',
       headers: {
-          'Content-Type': 'application/json',
+        'Content-Type': 'application/json',
       },
-      body: JSON.stringify(userData),
-  });
+      body: JSON.stringify(updatedUserData),
+    });
 
-  if (!response.ok) {
+    if (!response.ok) {
       throw new Error('Failed to update user admin status');
-  }
+    }
 
-  return await response.json();
+    return await response.json();  // Return the response data
+  } catch (error) {
+    console.error('Error updating admin status:', error);
+    throw error;
+  }
 }
 
 export async function updateBooking(bookingId, status) {
@@ -82,7 +102,7 @@ export async function updateBooking(bookingId, status) {
   };
 
   // Call the UPSERT endpoint for bookings
-  const response = await fetch('http://localhost:5000/api/update_booking', {
+  const response = await fetch('http://localhost:5000/api/database/update_booking', {
       method: 'POST',
       headers: {
           'Content-Type': 'application/json',
