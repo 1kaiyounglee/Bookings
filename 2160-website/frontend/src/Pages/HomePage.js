@@ -1,21 +1,31 @@
-import React, { useState, useEffect } from 'react';
-import { Container, Box, IconButton, Typography, Button } from '@mui/material';
+import React, { useState, useEffect, useRef } from 'react';
+import { Box, IconButton, Typography } from '@mui/material';
 import { ArrowBackIos, ArrowForwardIos } from '@mui/icons-material';
-import { getPackages } from '../HelperFunctions/GetDatabaseModels';  // Import the function that fetches packages
+import { getPackages } from '../HelperFunctions/GetDatabaseModels';  // Use the new top 5 packages function
 import { useNavigate } from 'react-router-dom';
 
-
 function HomePage() {
-  const [currentSlide, setCurrentSlide] = useState(0);
-  const [slides, setSlides] = useState([]);  // Store package data
+  const [currentSlide, setCurrentSlide] = useState(1); // Start at the first cloned slide
+  const [slides, setSlides] = useState([]);
   const defaultColor = '#2e2e2e';  // Default grey color for packages with no image
-  
-  // Fetch packages when the component mounts
+  const navigate = useNavigate();
+  const transitionRef = useRef(null);
+  const [isTransitioning, setIsTransitioning] = useState(false); // Handle instant transitions
+
+  // Only make the text area clickable
+  const handleSlideClick = (packageId) => {
+    navigate(`/package/${packageId}`);  // Navigate to the specific package based on packageId
+  };
+
+  // Fetch top 5 packages when the component mounts
   useEffect(() => {
     async function fetchPackages() {
       const packages = await getPackages();
-      console.log(packages);
-      setSlides(packages || []);  // Set the slides to be the packages or an empty array if none
+      if (packages.length > 0) {
+        // Add clones: clone the last slide to the front, and the first slide to the end
+        const clonedSlides = [packages[packages.length - 1], ...packages, packages[0]];
+        setSlides(clonedSlides);
+      }
     }
     fetchPackages();
   }, []);
@@ -24,30 +34,46 @@ function HomePage() {
   useEffect(() => {
     const slideInterval = setInterval(() => {
       nextSlide();
-    }, 15000);  // Interval changed to 15 seconds
+    }, 15000);
 
-    return () => clearInterval(slideInterval);  // Cleanup the interval on component unmount
+    return () => clearInterval(slideInterval);
   }, [currentSlide]);
 
-  // Function to handle slideshow slide change
-  const nextSlide = () => {
-    setCurrentSlide((prev) => (prev + 1) % slides.length);
-  };
-  
-  const prevSlide = () => {
-    setCurrentSlide((prev) => (prev - 1 + slides.length) % slides.length);
+  // Function to handle seamless transitions
+  const handleTransitionEnd = () => {
+    if (currentSlide === slides.length - 1) {
+      setIsTransitioning(true);
+      setCurrentSlide(1);
+    } else if (currentSlide === 0) {
+      setIsTransitioning(true);
+      setCurrentSlide(slides.length - 2);
+    }
   };
 
-  // Handle the slide click (you can implement the redirect logic here)
-  const handleSlideClick = (packageId) => {
-    console.log(`Package clicked: ${packageId}`);
-    // Handle the click event, e.g., redirect to a package detail page
+  const nextSlide = () => {
+    if (!isTransitioning) {
+      setCurrentSlide((prev) => prev + 1);
+    }
   };
+
+  const prevSlide = () => {
+    if (!isTransitioning) {
+      setCurrentSlide((prev) => prev - 1);
+    }
+  };
+
+  useEffect(() => {
+    if (isTransitioning) {
+      setTimeout(() => {
+        setIsTransitioning(false);  // Re-enable transitions after jump
+      }, 50);
+    }
+  }, [isTransitioning]);
 
   const getSlideContent = (slide) => {
     const image = slide.images && slide.images.length > 0 ? `http://localhost:5000${slide.images[0]}` : null;
     const backgroundImage = image ? `url(${image})` : defaultColor;
-    
+    console.log(slide.package_id);
     return (
       <Box
         key={slide.package_id}
@@ -61,10 +87,8 @@ function HomePage() {
           backgroundSize: 'cover',
           backgroundPosition: 'center',
           backgroundRepeat: 'no-repeat',
-          cursor: 'pointer',
           position: 'relative',
         }}
-        onClick={() => handleSlideClick(slide.package_id)}
       >
         {/* Text Box with Background */}
         <Box
@@ -79,7 +103,14 @@ function HomePage() {
             backgroundColor: 'rgba(0, 0, 0, 0.5)', // Transparent grey background
             borderRadius: '8px', // Slightly rounded corners
             textAlign: 'left',
+            cursor: 'pointer', // Make the grey background area clickable
+            transition: 'background-color 0.3s', // Smooth transition for hover effect
+            '&:hover': {
+              backgroundColor: 'rgba(0, 0, 0, 0.7)', // Darker background on hover
+              transform: 'scale(1.05)', // Slight zoom effect on hover
+            },
           }}
+          onClick={() => handleSlideClick(slide.package_id)} // Only the grey background area is clickable
         >
           {/* Package Title */}
           <Typography variant="h4" sx={{ marginBottom: '8px', fontWeight: 'bold' }}>
@@ -91,10 +122,7 @@ function HomePage() {
         </Box>
       </Box>
     );
-};
-
-  
-  
+  };
 
   return (
     <>
@@ -140,10 +168,11 @@ function HomePage() {
           <Box
             sx={{
               display: 'flex',
-              transition: 'transform 0.5s ease-in-out', // Slide effect
+              transition: isTransitioning ? 'none' : 'transform 0.5s ease-in-out', // Slide effect
               transform: `translateX(-${currentSlide * 100}%)`, // Moves slides left or right
-              width: `${slides.length * 100}%`,
+              width: `${slides.length * 100}%`, // Total width based on number of slides
             }}
+            onTransitionEnd={handleTransitionEnd}
           >
             {slides.map((slide) => getSlideContent(slide))}
           </Box>
@@ -167,22 +196,20 @@ function HomePage() {
 
         {/* Dots Indicator */}
         <Box sx={{ position: 'absolute', bottom: '80px', display: 'flex', gap: '8px' }}>
-          {slides.map((_, index) => (
+          {slides.slice(1, -1).map((_, index) => (
             <Box
               key={index}
               sx={{
                 width: '12px',
                 height: '12px',
                 borderRadius: '50%',
-                backgroundColor: currentSlide === index ? 'white' : 'grey',
+                backgroundColor: currentSlide === index + 1 ? 'white' : 'grey',
                 transition: 'background-color 0.3s',
               }}
             />
           ))}
         </Box>
       </Box>
-
-     
     </>
   );
 }
