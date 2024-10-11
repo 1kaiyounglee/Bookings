@@ -37,6 +37,7 @@ function ManageUsersModal({ open, onClose }) {
   useEffect(() => {
     if (open) {
       fetchUsers();
+      setSuccessMessage(''); // Clear success message when modal is opened
     }
   }, [open]);
 
@@ -46,6 +47,7 @@ function ManageUsersModal({ open, onClose }) {
       onClose={(_, reason) => {
         if (reason !== 'backdropClick') {
           onClose();
+          setSuccessMessage(''); // Clear success message when modal is closed
         }
       }}
       aria-labelledby="manage-users-modal"
@@ -53,7 +55,10 @@ function ManageUsersModal({ open, onClose }) {
       <Box sx={modalStyle}>
         <IconButton
           aria-label="close"
-          onClick={onClose}
+          onClick={() => {
+            onClose();
+            setSuccessMessage(''); // Clear success message when modal is closed via close button
+          }}
           sx={{ position: 'absolute', right: 8, top: 8, color: 'white' }}
         >
           <CloseRoundedIcon />
