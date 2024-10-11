@@ -40,7 +40,9 @@ def fetch_and_print_all_tables():
         "OrderItems": "SELECT * FROM OrderItems;",
         "Locations": "SELECT * FROM Locations;",
         "Categories": "SELECT * FROM Categories;",
-        "PackageCategory": "SELECT * FROM PackageCategory;"
+        "PackageCategory": "SELECT * FROM PackageCategory;",
+        "PackageImages": "SELECT * FROM PackageImages;"
+
     }
     
     for table, query in queries.items():

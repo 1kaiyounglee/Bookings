@@ -12,6 +12,7 @@ function HomePage() {
   useEffect(() => {
     async function fetchPackages() {
       const packages = await getPackages();
+      console.log(packages);
       setSlides(packages || []);  // Set the slides to be the packages or an empty array if none
     }
     fetchPackages();
@@ -41,10 +42,9 @@ function HomePage() {
     // Handle the click event, e.g., redirect to a package detail page
   };
 
-  // Get the current slide's image and package details
   const getSlideContent = (slide) => {
-    const image = slide.images && slide.images.length > 0 ? slide.images[0] : null;  // Get the lowest image id
-    const backgroundImage = image ? `url(${image})` : defaultColor;  // If no image, use default grey color
+    const image = slide.images && slide.images.length > 0 ? `http://localhost:5000${slide.images[0]}` : null;
+    const backgroundImage = image ? `url(${image})` : defaultColor;
     
     return (
       <Box
@@ -56,31 +56,43 @@ function HomePage() {
           justifyContent: 'center',
           alignItems: 'center',
           backgroundImage: backgroundImage === defaultColor ? 'none' : backgroundImage,
-          backgroundSize: 'cover',  // Scales image to cover entire area, may crop parts
-          backgroundPosition: 'center',  // Centers the image
+          backgroundSize: 'cover',
+          backgroundPosition: 'center',
           backgroundRepeat: 'no-repeat',
           cursor: 'pointer',
           position: 'relative',
         }}
-        onClick={() => handleSlideClick(slide.package_id)}  // Make the slide clickable
+        onClick={() => handleSlideClick(slide.package_id)}
       >
-        {/* Overlay for package details */}
+        {/* Text Box with Background */}
         <Box
           sx={{
             position: 'absolute',
-            bottom: '20px',
-            left: '20px',
+            left: '60px',
+            display: 'flex',
+            flexDirection: 'column', // Stack title and details vertically
+            justifyContent: 'center',
             color: 'white',
+            padding: '10px', // Add padding for spacing
+            backgroundColor: 'rgba(0, 0, 0, 0.5)', // Transparent grey background
+            borderRadius: '8px', // Slightly rounded corners
+            textAlign: 'left',
           }}
         >
-          <Typography variant="h4">{slide.description}</Typography>
+          {/* Package Title */}
+          <Typography variant="h4" sx={{ marginBottom: '8px', fontWeight: 'bold' }}>
+            {slide.name}
+          </Typography>
+          {/* Package Location and Duration */}
           <Typography variant="body1">Location: {slide.location || 'Unknown'}</Typography>
-          <Typography variant="body1">Price: ${slide.price}</Typography>
           <Typography variant="body1">Duration: {slide.duration} days</Typography>
         </Box>
       </Box>
     );
-  };
+};
+
+  
+  
 
   return (
     <>
@@ -131,7 +143,7 @@ function HomePage() {
               width: `${slides.length * 100}%`,
             }}
           >
-            {slides.map((slide, index) => getSlideContent(slide))}
+            {slides.map((slide) => getSlideContent(slide))}
           </Box>
         </Box>
 

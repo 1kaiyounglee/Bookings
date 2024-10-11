@@ -64,18 +64,19 @@ export async function getUsers(whereClause = "") {
 
 // Function to get the top 5 Packages data based on the number of orders
 export async function getPackages(whereClause = "") {
-  // Fetch the package data with the number of orders
+  // Query to get the top 5 packages based on the number of orders
   const query = `
     SELECT p.*, COUNT(o.order_id) AS order_count
     FROM Packages p
     LEFT JOIN Bookings b ON p.package_id = b.package_id
-    LEFT JOIN Orders o ON b.booking_id = o.order_id
+    LEFT JOIN OrderItems oi ON b.booking_id = oi.booking_id
+    LEFT JOIN Orders o ON oi.order_id = o.order_id
     GROUP BY p.package_id
     ORDER BY order_count DESC
-    LIMIT 5
+    LIMIT 5;
   `;
   
-  const data = await getData(query, whereClause);
+  const data = await fetchDatabaseData(query);
 
   if (!data) {
     console.log("\n\n\n DB RETURNED NOTHING!!!!!1 \n\n\n");
@@ -83,35 +84,37 @@ export async function getPackages(whereClause = "") {
   }
 
   // Fetch the related data for images, categories, and locations
-  const imagesData = (await getData("PackageImages")) || []; // Default to empty array if null/undefined
+  const imagesData = (await getData("PackageImages")) || [];
   const categoriesData = (await getData("PackageCategory")) || [];
   const locationsData = (await getData("Locations")) || [];
 
   // Transform the data into a dictionary-like object (JSON format)
   const packages = data.map((pkg) => {
-    // Get related images and sort them by image_id (flag if no images)
     const relatedImages = imagesData
       .filter((img) => img.package_id === pkg.package_id)
-      .sort((a, b) => a.image_id - b.image_id); // Sort by image_id (ascending)
+      .sort((a, b) => a.image_id - b.image_id);
 
     const hasImages = relatedImages.length > 0;
-    const imagePaths = hasImages ? relatedImages.map((img) => img.image_path) : null; // Null if no images
+    const imagePaths = hasImages 
+      ? relatedImages.map((img) => `/backend/images/${img.image_path}`)  // Corrected the image path
+      : null;
 
-    // Get related categories and location (handle missing values)
     const relatedCategories = categoriesData.filter((cat) => cat.package_id === pkg.package_id);
     const relatedLocation = locationsData.find((loc) => loc.location_id === pkg.location_id);
 
     return {
       package_id: pkg.package_id,
-      description: pkg.description || "MISSING",  // Handle missing description
-      duration: pkg.duration || "MISSING",  // Handle missing duration
-      price: pkg.price || "MISSING",  // Handle missing price
-      location: relatedLocation ? relatedLocation.location_name : "MISSING",  // Handle missing location
-      images: imagePaths || [],  // Empty array for no images
-      hasImages: hasImages,  // Flag to indicate whether images exist
-      categories: relatedCategories.length > 0 ? relatedCategories.map((cat) => cat.category_id) : ["MISSING"]  // Handle missing categories
+      description: pkg.description || "MISSING",
+      duration: pkg.duration || "MISSING",
+      price: pkg.price || "MISSING",
+      location: relatedLocation ? relatedLocation.city : "MISSING",
+      images: imagePaths || [],
+      hasImages: hasImages,
+      categories: relatedCategories.length > 0 ? relatedCategories.map((cat) => cat.category_id) : ["MISSING"]
     };
   });
 
-  return packages; // Return the array of package objects
+  return packages;
 }
+
+
