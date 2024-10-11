@@ -176,6 +176,7 @@ export async function getPackagesGeneral(whereClause = "") {
 
   return packages;
 }
+
 export async function getBookings() {
   // Fetch the bookings data from the Bookings table
   const bookingsData = await getData("Bookings");
@@ -202,7 +203,7 @@ export async function getBookings() {
           email: booking.email,
           user_name: `${user.first_name || "Unknown"} ${user.last_name || ""}`.trim(),
           package_id: booking.package_id,
-          package_name: packageInfo.name || "Unknown Package",
+          package_name: packageInfo.name || "Unknown Package",  // Use package name instead of package_id
           start_date: booking.start_date,
           end_date: booking.end_date,
           number_of_travellers: booking.number_of_travellers || 0,
@@ -210,6 +211,5 @@ export async function getBookings() {
           status: booking.status || "pending", // Default to 'pending' if status is missing
       };
   });
-
   return bookings;
 }

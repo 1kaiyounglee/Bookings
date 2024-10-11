@@ -95,9 +95,15 @@ export async function updateAdmin(email, isAdmin) {
 }
 
 export async function updateBooking(bookingId, status) {
+  const bookings = await getData("Bookings",`booking_id = '${bookingId}'`);
+    if (!bookings || bookings.length === 0) {
+      throw new Error('User not found');
+    }
+    
+  const booking = bookings[0]; 
   // Define the booking data for UPSERT
   const bookingData = {
-      booking_id: bookingId,
+      ...booking,
       status: status
   };
 

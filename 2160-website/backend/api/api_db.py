@@ -100,9 +100,17 @@ def update_booking():
     try:
         booking_data = {
             'booking_id': data['booking_id'],
+            'email': data['email'],
+            'package_id': data['package_id'],
+            'start_date': data['start_date'],
+            'end_date': data['end_date'],
+            'number_of_travellers': data['number_of_travellers'],
+            'price': data['price'],
             'status': data['status']
         }
-        success = db.upsert_data('Bookings', booking_data)
+        print(booking_data)
+        df = pd.DataFrame([booking_data])
+        success = db.upsert_data('Bookings', df)
         if success:
             return jsonify({"message": "Booking updated successfully"}), 200
         else:
