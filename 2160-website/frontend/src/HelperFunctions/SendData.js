@@ -165,23 +165,26 @@ export async function updateCartItem(item, newStartDate, newEndDate, newTravelle
   }
 }
 
-export async function removeCartItem(bookingId) {
+export async function removeCartItem(item) {
   try {
     // Fetch the booking item by booking ID
-    const bookings = await getData("Bookings", `booking_id = ${bookingId}`);
+    const bookings = await getData("Bookings", `booking_id = ${item.bookingId}`);
     if (!bookings || bookings.length === 0) {
       throw new Error('Booking not found');
     }
 
-    console.log("Deleting booking:", bookings[0]);
+    console.log("Deleting booking:", item.bookingId);
 
     // Call the backend to delete the booking
-    const response = await fetch('http://localhost:5000/api/database/delete_booking', {
-      method: 'POST',
+    const response = await fetch('http://localhost:5000/api/database/delete_entry', {
+      method: 'DELETE',
       headers: {
         'Content-Type': 'application/json',
       },
-      body: JSON.stringify({ booking_id: bookingId }),
+      body: JSON.stringify({ 
+        table: 'Bookings',
+        id: item.bookingId
+      }),
     });
 
     if (!response.ok) {

@@ -28,9 +28,9 @@ function Cart({ user }) {
     fetchCartItems();
   };
 
-  const handleRemoveItem = async (itemId) => {
+  const handleRemoveItem = async (item) => {
     // Remove the cart item
-    await removeCartItem(itemId);
+    await removeCartItem(item);
     setEditModalOpen(false);
     // Refresh cart items after removal
     fetchCartItems();
@@ -65,7 +65,7 @@ function Cart({ user }) {
     }
   };
 
-  
+
   useEffect(() => {
     fetchCartItems();
   }, [user.email]);

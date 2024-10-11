@@ -12,7 +12,7 @@ from api.api_auth import auth_bp  # Import auth routes
 app = Flask(__name__)
 
 # Enable CORS for all routes
-CORS(app, resources={r"/api/*": {"origins": "*"}}, supports_credentials=True)
+CORS(app, resources={r"/api/*": {"origins": "http://localhost:3000"}}, supports_credentials=True)
 
 # JWT configuration
 app.config['JWT_SECRET_KEY'] = 'secret_key'  # Change this to a strong secret key
