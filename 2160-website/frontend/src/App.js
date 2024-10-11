@@ -1,12 +1,13 @@
 import React, { useState, useEffect } from 'react';
-import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';  // Import React Router components
 import { createTheme, ThemeProvider } from '@mui/material/styles';
 import { Box, CircularProgress, Backdrop } from '@mui/material';
+import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';  // Import necessary components for routing
 import LoginModal from './Components/LoginModal';
 import RegisterModal from './Components/RegisterModal';
 import Navbar from './Components/Navbar';
 import HomePage from './Pages/HomePage';
 import MyBookings from './Pages/MyBookings'
+import PackageDetails from './Pages/PackageDetails';  // Import PackageDetails page
 import { deepPurple } from '@mui/material/colors';
 
 const darkTheme = createTheme({
@@ -105,6 +106,7 @@ function App() {
           {/* Define the Routes to different pages */}
           <Routes>
             <Route path="/" element={<HomePage />} />  {/* Default Home Page */}
+            <Route path="/package/:packageId" element={<PackageDetails />} />  {/* Route for package details */}
             <Route path="/bookings" element={<MyBookings />} />  {/* Bookings Page */}
           </Routes>
 
