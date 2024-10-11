@@ -8,6 +8,7 @@ class Packages(Base):
     
     package_id          = Column(Integer, primary_key=True, autoincrement=True)
     location_id         = Column(Integer, ForeignKey('Locations.location_id'), nullable=False)
+    name                = Column(String, nullable=False)
     description         = Column(String, nullable=False)
     duration            = Column(Integer, nullable=False)
     price               = Column(Numeric(10, 2), nullable=False)
