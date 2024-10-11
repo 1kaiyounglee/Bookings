@@ -117,6 +117,74 @@ export async function getPackages() {
   return packages;
 }
 
+export async function getUserOrders(email) {
+  const query = `
+    SELECT 
+      o.order_id, o.email, o.total_price, o.order_date, o.payment_status, 
+      b.start_date, b.end_date, b.number_of_travellers, b.price, b.status, 
+      p.package_id, p.name, p.duration, 
+      l.country, l.city
+    FROM Orders o 
+    JOIN OrderItems oi ON o.order_id = oi.order_id
+    JOIN Bookings b ON oi.booking_id = b.booking_id
+    JOIN Packages p ON b.package_id = p.package_id
+    JOIN Locations l ON p.location_id = l.location_id
+    WHERE o.email = '${email}'
+    ORDER BY o.order_date DESC,
+        CASE 
+            WHEN b.status = 'pending'   THEN 1
+            WHEN b.status = 'confirmed' THEN 2
+            WHEN b.status = 'cancelled' THEN 3
+        END;
+  `;
+
+  const data = await fetchDatabaseData(query);
+  console.log(data); // Add this to see the raw data from the database
+  
+  if (!data || data.length === 0) {
+    return [];
+  }
+
+  const imagesData = (await getData("PackageImages")) || [];
+
+  // Group orders by `order_id`
+  const ordersMap = {};
+
+  data.forEach(row => {
+    const orderId = row.order_id;
+
+    if (!ordersMap[orderId]) {
+      ordersMap[orderId] = {
+        date: row.order_date,
+        paymentStatus: row.payment_status,
+        totalPrice: row.total_price,
+        items: []
+      };
+    }
+
+    const relatedImages = imagesData.filter((img) => img.package_id === row.package_id);
+    const firstImage = relatedImages.length > 0 ? `/backend/images/${relatedImages[0].image_path}` : null;
+    console.log(firstImage)
+
+    // Add each item to the corresponding order
+    ordersMap[orderId].items.push({
+      id: row.package_id,
+      packageName: row.name,
+      location: `${row.city}, ${row.country}`,
+      duration: row.duration,
+      description: row.description,
+      startDate: row.start_date,
+      endDate: row.end_date,
+      price: row.price,
+      status: row.status,
+      travellers: row.number_of_travellers,
+      image: firstImage
+    });
+  });
+
+  return Object.values(ordersMap);
+}
+
 export async function getPackagesGeneral(whereClause = "") {
   // Build the base query with a dynamic WHERE clause
   const query = `

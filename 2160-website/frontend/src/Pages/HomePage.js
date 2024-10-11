@@ -1,8 +1,8 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { Box, IconButton, Typography } from '@mui/material';
 import { ArrowBackIos, ArrowForwardIos } from '@mui/icons-material';
-import { getPackages } from '../HelperFunctions/GetDatabaseModels';  // Use the new top 5 packages function
 import { useNavigate } from 'react-router-dom';
+import { getPackages } from '../HelperFunctions/GetDatabaseModels';  // Use the new top 5 packages function
 
 function HomePage() {
   const [currentSlide, setCurrentSlide] = useState(1); // Start at the first cloned slide

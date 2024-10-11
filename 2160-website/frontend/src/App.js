@@ -107,7 +107,7 @@ function App() {
           <Routes>
             <Route path="/" element={<HomePage />} />  {/* Default Home Page */}
             <Route path="/package/:packageId" element={<PackageDetails />} />  {/* Route for package details */}
-            <Route path="/bookings" element={<MyBookings />} />  {/* Bookings Page */}
+            <Route path="/bookings" element={<MyBookings user={user}/>} />  {/* Bookings Page */}
           </Routes>
 
           {/* Modal for login */}
