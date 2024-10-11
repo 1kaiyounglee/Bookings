@@ -45,3 +45,50 @@ export async function handleLogin(values) {
     return { error: data.msg };  // Return an error object for failed login
   }
 }
+
+
+export async function updateAdmin(email, isAdmin) {
+  // Define the user data for UPSERT
+  const userData = {
+      email: email,
+      is_admin: isAdmin ? 1 : 0
+  };
+
+  // Call the UPSERT endpoint for users
+  const response = await fetch('http://localhost:5000/api/update_user', {
+      method: 'POST',
+      headers: {
+          'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(userData),
+  });
+
+  if (!response.ok) {
+      throw new Error('Failed to update user admin status');
+  }
+
+  return await response.json();
+}
+
+export async function updateBooking(bookingId, status) {
+  // Define the booking data for UPSERT
+  const bookingData = {
+      booking_id: bookingId,
+      status: status
+  };
+
+  // Call the UPSERT endpoint for bookings
+  const response = await fetch('http://localhost:5000/api/update_booking', {
+      method: 'POST',
+      headers: {
+          'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(bookingData),
+  });
+
+  if (!response.ok) {
+      throw new Error('Failed to update booking status');
+  }
+
+  return await response.json();
+}

@@ -1,9 +1,12 @@
 import React from 'react';
 import { AppBar, Toolbar, Typography, Button, IconButton } from '@mui/material';
 import MenuIcon from '@mui/icons-material/Menu';
-import LogoutIcon from '@mui/icons-material/Logout'; // Add Logout icon
+import LogoutIcon from '@mui/icons-material/Logout';
+import { useNavigate } from 'react-router-dom';
 
-function Navbar({ onLoginRegisterClick, isLoggedIn, handleLogout }) {
+function Navbar({ onLoginRegisterClick, isLoggedIn, handleLogout, isAdmin }) {
+  const navigate = useNavigate();
+
   return (
     <AppBar position="static">
       <Toolbar>
@@ -15,6 +18,9 @@ function Navbar({ onLoginRegisterClick, isLoggedIn, handleLogout }) {
         </Typography>
         {isLoggedIn ? (
           <>
+            {isAdmin && (
+              <Button color="inherit" onClick={() => navigate('/admin')}>Admin Panel</Button>
+            )}
             <Button color="inherit">My Account</Button>
             <IconButton color="inherit" onClick={handleLogout}>
               <LogoutIcon />

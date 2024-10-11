@@ -7,6 +7,7 @@ import RegisterModal from './Components/RegisterModal';
 import Navbar from './Components/Navbar';
 import HomePage from './Pages/HomePage';
 import PackageDetails from './Pages/PackageDetails';  // Import PackageDetails page
+import AdminPanel from './Pages/AdminPanel';  // Import AdminPanel page
 import { deepPurple } from '@mui/material/colors';
 
 const darkTheme = createTheme({
@@ -20,18 +21,35 @@ function App() {
   const [isLoginOpen, setIsLoginOpen] = useState(false);  // Initially modals are closed
   const [isRegisterOpen, setIsRegisterOpen] = useState(false);
   const [isLoggedIn, setIsLoggedIn] = useState(!!localStorage.getItem('jwt_token'));
+  const [isAdmin, setIsAdmin] = useState(false); // State to track if the user is admin
   const [loading, setLoading] = useState(false); // Loading state for the whole page
 
   useEffect(() => {
+    // Fetch user data from localStorage or make an API call to check admin status
+    const fetchUserData = async () => {
+      const token = localStorage.getItem('jwt_token');
+      if (token) {
+        // Normally, you would make an API call to check if the user is admin
+        // Here we're simulating it by checking localStorage
+        const response = await fetch('/api/check_admin', {
+          headers: {
+            'Authorization': `Bearer ${token}`,
+          },
+        });
+        const userData = await response.json();
+        setIsAdmin(userData.is_admin);  // Set admin status based on user data
+        setIsLoggedIn(true);
+      }
+    };
     if (isLoggedIn) {
-      setIsLoginOpen(false);  // Ensure modals close after login
-      setIsRegisterOpen(false);
+      fetchUserData();
     }
   }, [isLoggedIn]);
 
   const handleLogout = () => {
     localStorage.removeItem('jwt_token');
     setIsLoggedIn(false);
+    setIsAdmin(false); // Reset admin status on logout
   };
 
   const openLoginModal = () => {
@@ -69,6 +87,7 @@ function App() {
           <Navbar
             onLoginRegisterClick={openLoginModal}  // Open login modal when button clicked
             isLoggedIn={isLoggedIn}
+            isAdmin={isAdmin}  // Pass admin status to Navbar
             handleLogout={handleLogout}
           />
 
@@ -76,6 +95,7 @@ function App() {
           <Routes>
             <Route path="/" element={<HomePage />} />
             <Route path="/package/:packageId" element={<PackageDetails />} />  {/* Route for package details */}
+            {isAdmin && <Route path="/admin" element={<AdminPanel />} />} {/* Admin panel route */}
           </Routes>
 
           {/* Modal for login */}
