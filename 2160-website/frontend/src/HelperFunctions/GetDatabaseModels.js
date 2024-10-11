@@ -117,7 +117,6 @@ export async function getPackages() {
   return packages;
 }
 
-// General-purpose function to get packages based on a whereClause
 export async function getPackagesGeneral(whereClause = "") {
   // Build the base query with a dynamic WHERE clause
   const query = `
@@ -134,12 +133,14 @@ export async function getPackagesGeneral(whereClause = "") {
     throw new Error("Database returned nothing");
   }
 
-  // Fetch the related data for images and categories
+  // Fetch the related data for images, categories, and category names
   const imagesData = (await getData("PackageImages")) || [];
-  const categoriesData = (await getData("PackageCategory")) || [];
+  const packageCategoriesData = (await getData("PackageCategory")) || [];
+  const categoriesData = (await getData("Categories")) || [];
 
   // Transform the data into a dictionary-like object (JSON format)
   const packages = data.map((pkg) => {
+    // Filter related images for each package
     const relatedImages = imagesData
       .filter((img) => img.package_id === pkg.package_id)
       .sort((a, b) => a.image_id - b.image_id);
@@ -149,7 +150,15 @@ export async function getPackagesGeneral(whereClause = "") {
       ? relatedImages.map((img) => `/backend/images/${img.image_path}`)  // Corrected the image path
       : null;
 
-    const relatedCategories = categoriesData.filter((cat) => cat.package_id === pkg.package_id);
+    // Get the categories (themes) for each package by matching the package ID with PackageCategory table
+    const relatedCategoryIds = packageCategoriesData
+      .filter((cat) => cat.package_id === pkg.package_id)
+      .map((cat) => cat.category_id);
+
+    // Map category IDs to actual category names
+    const themeNames = relatedCategoryIds
+      .map((catId) => categoriesData.find((category) => category.category_id === catId)?.name)
+      .filter(Boolean); // Removes any undefined/null values
 
     return {
       package_id: pkg.package_id,
@@ -161,7 +170,7 @@ export async function getPackagesGeneral(whereClause = "") {
       location_country: pkg.location_country || "MISSING",
       images: imagePaths || [],
       hasImages: hasImages,
-      categories: relatedCategories.length > 0 ? relatedCategories.map((cat) => cat.category_id) : ["MISSING"]
+      categories: themeNames.length > 0 ? themeNames : ["MISSING"] // Now returns theme names instead of IDs
     };
   });
 
