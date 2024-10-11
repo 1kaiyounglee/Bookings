@@ -1,15 +1,21 @@
 import React from 'react';
-import { AppBar, Toolbar, Typography, Button, IconButton, Box } from '@mui/material';
+import { AppBar, Toolbar, Typography, Button, IconButton, Box, Tooltip } from '@mui/material';
 import MenuIcon from '@mui/icons-material/Menu';
-import LogoutIcon from '@mui/icons-material/Logout'; // Add Logout icon
+import LogoutIcon from '@mui/icons-material/Logout';
+import AdminPanelSettingsRoundedIcon from '@mui/icons-material/AdminPanelSettingsRounded';
 import { useNavigate } from 'react-router-dom';
 
-function Navbar({ onLoginRegisterClick, handleLogout, user}) {
+function Navbar({ onLoginRegisterClick, isLoggedIn, handleLogout, user }) {
   const navigate = useNavigate();
 
   const handleBookingsClick = () => {
-    navigate('/bookings')
-  }
+    navigate('/bookings');
+  };
+
+  const handleAdminPanelClick = () => {
+    navigate('/admin');  // Navigate to the Admin Panel page
+  };
+  
 
   return (
     <AppBar position="static">
@@ -28,9 +34,18 @@ function Navbar({ onLoginRegisterClick, handleLogout, user}) {
             <Button color="inherit" onClick={handleBookingsClick}>
               {user.firstName} {user.lastName}
             </Button>
-            <IconButton color="inherit" onClick={handleLogout}>
-              <LogoutIcon />
-            </IconButton>
+            {user.isAdmin && (
+              <Tooltip title="Admin Panel">
+                <IconButton color="inherit" onClick={handleAdminPanelClick}>
+                  <AdminPanelSettingsRoundedIcon />
+                </IconButton>
+              </Tooltip>
+            )}
+            <Tooltip title="Logout">
+              <IconButton color="inherit" onClick={handleLogout}>
+                <LogoutIcon />
+              </IconButton>
+            </Tooltip>
           </Box>
         ) : (
           <Button color="inherit" onClick={onLoginRegisterClick}>

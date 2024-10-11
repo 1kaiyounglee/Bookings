@@ -71,3 +71,49 @@ def create_user():
     except Exception as e:
         return jsonify({'error': str(e)}), 500
 
+# Route to update or insert user admin status
+@api_db.route('/update_user', methods=['POST'])
+def update_user():
+    data = request.json
+    try:
+        user_data = {
+            'email': data['email'],
+            'phone_number':data['phone_number'],
+            'first_name':data['first_name'],
+            'last_name':data['last_name'],
+            'is_admin': data['is_admin']
+        }
+        df = pd.DataFrame([user_data])
+        success = db.upsert_data('Users', df)
+        if success:
+            return jsonify({"message": "User updated successfully"}), 200
+        else:
+            return jsonify({"message": f"Failed to update user {user_data}"}), 500
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
+
+# Route to update or insert booking status
+@api_db.route('/update_booking', methods=['POST'])
+def update_booking():
+    data = request.json
+    try:
+        booking_data = {
+            'booking_id': data['booking_id'],
+            'email': data['email'],
+            'package_id': data['package_id'],
+            'start_date': data['start_date'],
+            'end_date': data['end_date'],
+            'number_of_travellers': data['number_of_travellers'],
+            'price': data['price'],
+            'status': data['status']
+        }
+        print(booking_data)
+        df = pd.DataFrame([booking_data])
+        success = db.upsert_data('Bookings', df)
+        if success:
+            return jsonify({"message": "Booking updated successfully"}), 200
+        else:
+            return jsonify({"message": "Failed to update booking"}), 500
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500

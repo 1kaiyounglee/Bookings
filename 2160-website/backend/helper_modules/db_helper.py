@@ -86,26 +86,30 @@ def upsert_data(table_name, df):
     try:
         session = Session()
 
-        # Fetch table metadata (column info)
+        # Ensure all required columns (including those with defaults like is_admin) are in the DataFrame
         table_metadata = session.execute(text(f"PRAGMA table_info({table_name})")).fetchall()
+
         table_columns = {col[1]: col for col in table_metadata}  # Dictionary of column names and info
 
-        # Check if the record exists by querying the first column (assuming it's the primary key)
-        conflict_column = df.columns[0]  # The first column (e.g., 'email') is the conflict target
-        conflict_value = df.iloc[0][conflict_column]
-
+        # Check if the primary key (email in this case) already exists in the database
+        conflict_column = df.columns[0]  # Assuming the first column (email) is the conflict target (primary key)
         existing_record = session.execute(
             text(f"SELECT * FROM {table_name} WHERE {conflict_column} = :conflict_value"),
-            {'conflict_value': conflict_value}
+            {'conflict_value': df.iloc[0][conflict_column]}
         ).fetchone()
 
-        # If record exists, merge the missing required columns from the existing record
+        # If the user exists, ensure we keep their password if it's not in the DataFrame
         if existing_record:
             for col_name, col_info in table_columns.items():
-                if col_name not in df.columns and col_info[3] == 1:  # col_info[3] == 1 indicates NOT NULL
-                    df[col_name] = existing_record[table_columns[col_name][0]]  # Correct tuple access using index
+                if col_name == 'password' and col_name not in df.columns:  # Fetch the existing password
+                    df[col_name] = existing_record.password
 
-        # Prepare data for insert/update
+        # Add default values for missing columns, if necessary
+        for col_name, col_info in table_columns.items():
+            if col_name not in df.columns and col_info[4] is not None:  # col_info[4] is the default value
+                df[col_name] = col_info[4]  # Assign the default value to the missing column
+
+        # Prepare the insert/update SQL
         columns = df.columns.tolist()
         values = df.iloc[0].to_dict()
 
@@ -113,10 +117,8 @@ def upsert_data(table_name, df):
         column_names = ', '.join(columns)
         value_placeholders = ', '.join([f":{col}" for col in columns])
 
-        # Conflict target (primary key or unique constraint)
+        # Conflict target is assumed to be the first column (e.g., email)
         conflict_target = columns[0]
-
-        # Set clause for UPDATE (excluding the conflict target)
         set_clause = ', '.join([f"{col} = :{col}" for col in columns if col != conflict_target])
 
         # Construct the UPSERT SQL command
@@ -127,7 +129,7 @@ def upsert_data(table_name, df):
         DO UPDATE SET {set_clause};
         """
 
-        # Execute UPSERT
+        # Execute the UPSERT
         session.execute(text(cmd_text), values)
         session.commit()
 
@@ -136,13 +138,14 @@ def upsert_data(table_name, df):
 
     except Exception as e:
         if session:
-            session.rollback()
+            session.rollback()  # Rollback in case of error
         print(f"Error during UPSERT operation: {e}")
         return False
-
     finally:
         if session:
             session.close()
+
+  
 
 
 def make_backup(tablename):
