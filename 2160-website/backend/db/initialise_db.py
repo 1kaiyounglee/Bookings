@@ -30,7 +30,7 @@ def insert_sample_data():
 
     # Sample users
     users = [
-        Users(email="jvon9617@uni.sydney.edu.au", password="1234abcd", phone_number="555-1234", first_name="Jett", last_name="Vongxayasy", is_admin=True),
+        Users(email="jettv224@gmail.com", password="$2b$12$oMaUFceU71wqjybIwAvKtuiFuZoQfQkpBVUpUrWW.IiHJIgF5GF0O", phone_number="555-1234", first_name="Jett", last_name="Vongxayasy", is_admin=True), # password is 1234
         Users(email="john.doe@example.com", password="password123", phone_number="555-1234", first_name="John", last_name="Doe", is_admin=False),
         Users(email="jane.smith@example.com", password="password456", phone_number="555-5678", first_name="Jane", last_name="Smith", is_admin=False),
         Users(email="alice.wonderland@example.com", password="wonder123", phone_number="555-9876", first_name="Alice", last_name="Wonderland", is_admin=False),
@@ -61,6 +61,11 @@ def insert_sample_data():
 
     # Sample bookings
     bookings = [
+        Bookings(email="jettv224@gmail.com", package_id=1, start_date=datetime.now(), end_date=datetime.now() + timedelta(days=3), number_of_travellers=2, price=499.99, status='confirmed'),
+        Bookings(email="jettv224@gmail.com", package_id=2, start_date=datetime.now(), end_date=datetime.now() + timedelta(days=5), number_of_travellers=1, price=899.99, status='pending'),
+        Bookings(email="jettv224@gmail.com", package_id=3, start_date=datetime.now(), end_date=datetime.now() + timedelta(days=4), number_of_travellers=4, price=699.99, status='confirmed'),
+        Bookings(email="jettv224@gmail.com", package_id=5, start_date=datetime.now(), end_date=datetime.now() + timedelta(days=4), number_of_travellers=4, price=699.99, status='pending'),
+        Bookings(email="jettv224@gmail.com", package_id=7, start_date=datetime.now(), end_date=datetime.now() + timedelta(days=4), number_of_travellers=4, price=699.99, status='cancelled'),
         Bookings(email="john.doe@example.com", package_id=1, start_date=datetime.now(), end_date=datetime.now() + timedelta(days=3), number_of_travellers=2, price=499.99, status='confirmed'),
         Bookings(email="jane.smith@example.com", package_id=2, start_date=datetime.now(), end_date=datetime.now() + timedelta(days=5), number_of_travellers=1, price=899.99, status='pending'),
         Bookings(email="alice.wonderland@example.com", package_id=3, start_date=datetime.now(), end_date=datetime.now() + timedelta(days=4), number_of_travellers=4, price=699.99, status='confirmed'),
@@ -71,6 +76,8 @@ def insert_sample_data():
 
     # Sample orders
     orders = [
+        Orders(email="jettv224@gmail.com", total_price = 1098.33, order_date=datetime.now(), payment_date=datetime.now(), payment_status='paid'),
+        Orders(email="jettv224@gmail.com", total_price = 175.32, order_date=datetime.now() - timedelta(days=7), payment_date=datetime.now() - timedelta(days=7), payment_status='paid'),
         Orders(email="john.doe@example.com", total_price=499.99, order_date=datetime.now(), payment_date=datetime.now(), payment_status='paid'),
         Orders(email="jane.smith@example.com", total_price=899.99, order_date=datetime.now(), payment_status='pending'),
         Orders(email="alice.wonderland@example.com", total_price=699.99, order_date=datetime.now(), payment_date=datetime.now(), payment_status='paid'),
@@ -82,10 +89,13 @@ def insert_sample_data():
     # Sample order items
     order_items = [
         OrderItems(order_id=1, booking_id=1),
-        OrderItems(order_id=2, booking_id=2),
-        OrderItems(order_id=3, booking_id=3),
-        OrderItems(order_id=4, booking_id=4),
-        OrderItems(order_id=5, booking_id=5),
+        OrderItems(order_id=1, booking_id=2),
+        OrderItems(order_id=1, booking_id=3),
+        OrderItems(order_id=2, booking_id=4),
+        OrderItems(order_id=2, booking_id=5),
+        OrderItems(order_id=3, booking_id=6),
+        OrderItems(order_id=4, booking_id=7),
+        OrderItems(order_id=5, booking_id=8),
     ]
     session.add_all(order_items)
 
