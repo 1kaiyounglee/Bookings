@@ -63,7 +63,18 @@ function LoginModal({ open, onClose, setIsLoggedIn, onRegisterClick, setLoading 
               console.log("RESULT:", result);
               if (!result.error) {
                 localStorage.setItem('jwt_token', result.access_token);
-                setIsLoggedIn(true);
+                localStorage.setItem('email', result.user.email);
+                localStorage.setItem('first_name', result.user.firstName);
+                localStorage.setItem('last_name', result.user.lastName);
+                localStorage.setItem('is_admin', result.user.isAdmin);
+
+                setIsLoggedIn(true, {
+                  email: result.user.email,
+                  firstName: result.user.firstName,
+                  lastName: result.user.lastName,
+                  isAdmin: result.user.isAdmin,
+                });
+                
                 onClose();  // Close modal after successful login
               } else {
                 setErrors({ email: result.error || 'Invalid email or password' });

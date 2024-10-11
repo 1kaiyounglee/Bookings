@@ -1,9 +1,16 @@
 import React from 'react';
-import { AppBar, Toolbar, Typography, Button, IconButton } from '@mui/material';
+import { AppBar, Toolbar, Typography, Button, IconButton, Box } from '@mui/material';
 import MenuIcon from '@mui/icons-material/Menu';
 import LogoutIcon from '@mui/icons-material/Logout'; // Add Logout icon
+import { useNavigate } from 'react-router-dom';
 
-function Navbar({ onLoginRegisterClick, isLoggedIn, handleLogout }) {
+function Navbar({ onLoginRegisterClick, handleLogout, user}) {
+  const navigate = useNavigate();
+
+  const handleBookingsClick = () => {
+    navigate('/bookings')
+  }
+
   return (
     <AppBar position="static">
       <Toolbar>
@@ -13,13 +20,18 @@ function Navbar({ onLoginRegisterClick, isLoggedIn, handleLogout }) {
         <Typography variant="h6" component="div" sx={{ flexGrow: 1 }}>
           Holiday Booking System
         </Typography>
-        {isLoggedIn ? (
-          <>
-            <Button color="inherit">My Account</Button>
+        {user.isLoggedIn ? (
+          <Box sx={{ display: 'flex', gap: '10px' }}> {/* Group buttons with spacing */}
+            <Button color="inherit" onClick={handleBookingsClick}>
+              My Bookings
+            </Button>
+            <Button color="inherit" onClick={handleBookingsClick}>
+              {user.firstName} {user.lastName}
+            </Button>
             <IconButton color="inherit" onClick={handleLogout}>
               <LogoutIcon />
             </IconButton>
-          </>
+          </Box>
         ) : (
           <Button color="inherit" onClick={onLoginRegisterClick}>
             Sign In / Register
