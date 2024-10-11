@@ -82,37 +82,44 @@ def upsert_data(table_name, df):
     Returns:
         bool: True if the operation is successful, False otherwise.
     """
+    session = None
     try:
-        # Ensure all required columns (including those with defaults like is_admin) are in the DataFrame
-        # Fetching the table metadata using SQLAlchemy to validate columns and apply defaults
         session = Session()
-        
-        # Wrapping the PRAGMA query in the text() function
+
+        # Fetch table metadata (column info)
         table_metadata = session.execute(text(f"PRAGMA table_info({table_name})")).fetchall()
-        session.close()
-
         table_columns = {col[1]: col for col in table_metadata}  # Dictionary of column names and info
-        
-        # Adding missing columns with default values to df, if necessary
-        for col_name, col_info in table_columns.items():
-            if col_name not in df.columns and col_info[4] is not None:  # col_info[4] is the default value
-                df[col_name] = col_info[4]  # Assign the default value to the missing column
 
-        # Extract column names and values from the DataFrame
+        # Check if the record exists by querying the first column (assuming it's the primary key)
+        conflict_column = df.columns[0]  # The first column (e.g., 'email') is the conflict target
+        conflict_value = df.iloc[0][conflict_column]
+
+        existing_record = session.execute(
+            text(f"SELECT * FROM {table_name} WHERE {conflict_column} = :conflict_value"),
+            {'conflict_value': conflict_value}
+        ).fetchone()
+
+        # If record exists, merge the missing required columns from the existing record
+        if existing_record:
+            for col_name, col_info in table_columns.items():
+                if col_name not in df.columns and col_info[3] == 1:  # col_info[3] == 1 indicates NOT NULL
+                    df[col_name] = existing_record[table_columns[col_name][0]]  # Correct tuple access using index
+
+        # Prepare data for insert/update
         columns = df.columns.tolist()
-        values = df.iloc[0].to_dict()  # Assuming one row; extend logic if multiple rows
+        values = df.iloc[0].to_dict()
 
-        # Build the SQL command with placeholders (let SQLAlchemy handle the type conversion)
+        # Build SQL query
         column_names = ', '.join(columns)
-        value_placeholders = ', '.join([f":{col}" for col in columns])  # Use parameter placeholders
+        value_placeholders = ', '.join([f":{col}" for col in columns])
 
-        # Generate conflict target, assuming the first column is the primary key or unique constraint
-        conflict_target = columns[0]  # The first column is assumed to be the conflict target (primary key)
+        # Conflict target (primary key or unique constraint)
+        conflict_target = columns[0]
 
-        # Build the SET clause for updating on conflict (skip conflict_target in update)
+        # Set clause for UPDATE (excluding the conflict target)
         set_clause = ', '.join([f"{col} = :{col}" for col in columns if col != conflict_target])
 
-        # Construct the full UPSERT SQL command with placeholders
+        # Construct the UPSERT SQL command
         cmd_text = f"""
         INSERT INTO {table_name} ({column_names})
         VALUES ({value_placeholders})
@@ -120,20 +127,22 @@ def upsert_data(table_name, df):
         DO UPDATE SET {set_clause};
         """
 
-        # Execute the UPSERT operation
-        session = Session()
+        # Execute UPSERT
         session.execute(text(cmd_text), values)
-        session.commit()  # Commit the transaction
+        session.commit()
 
         print("UPSERT operation completed successfully.")
         return True
+
     except Exception as e:
-        session.rollback()  # Rollback in case of error
+        if session:
+            session.rollback()
         print(f"Error during UPSERT operation: {e}")
         return False
-    finally:
-        session.close()
 
+    finally:
+        if session:
+            session.close()
 
 
 def make_backup(tablename):
