@@ -106,7 +106,7 @@ function App() {
           <Routes>
             <Route path="/" element={<HomePage />} />
             <Route path="/package/:packageId" element={<PackageDetails />} />
-            <Route path="/bookings" element={<MyBookings />} />
+            <Route path="/bookings" element={<MyBookings user={user}/>} />
             {user.isAdmin && <Route path="/admin" element={<AdminPanel user={user}/>} />}  {/* Admin route */}
           </Routes>
 
