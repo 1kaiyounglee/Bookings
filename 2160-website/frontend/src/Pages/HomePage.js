@@ -2,6 +2,8 @@ import React, { useState, useEffect } from 'react';
 import { Container, Box, IconButton, Typography, Button } from '@mui/material';
 import { ArrowBackIos, ArrowForwardIos } from '@mui/icons-material';
 import { getPackages } from '../HelperFunctions/GetDatabaseModels';  // Import the function that fetches packages
+import { useNavigate } from 'react-router-dom';
+
 
 function HomePage() {
   const [currentSlide, setCurrentSlide] = useState(0);
@@ -31,7 +33,7 @@ function HomePage() {
   const nextSlide = () => {
     setCurrentSlide((prev) => (prev + 1) % slides.length);
   };
-
+  
   const prevSlide = () => {
     setCurrentSlide((prev) => (prev - 1 + slides.length) % slides.length);
   };
@@ -180,26 +182,7 @@ function HomePage() {
         </Box>
       </Box>
 
-      {/* Bottom Buttons for Contact and FAQs */}
-      <Container sx={{ mt: 5, textAlign: 'center' }}>
-        <Box
-          sx={{
-            backgroundColor: '#2e2e2e',
-            padding: '10px',
-            margin: 'auto',
-            width: 'fit-content',
-            borderRadius: '8px',
-            textAlign: 'center',
-          }}
-        >
-          <Button variant="outlined" sx={{ m: 2, color: 'white', borderColor: 'white' }}>
-            Contact Us
-          </Button>
-          <Button variant="outlined" sx={{ m: 2, color: 'white', borderColor: 'white' }}>
-            FAQs
-          </Button>
-        </Box>
-      </Container>
+     
     </>
   );
 }
