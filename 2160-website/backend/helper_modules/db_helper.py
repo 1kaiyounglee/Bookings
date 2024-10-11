@@ -82,34 +82,43 @@ def upsert_data(table_name, df):
     Returns:
         bool: True if the operation is successful, False otherwise.
     """
+    session = None
     try:
-        # Ensure all required columns (including those with defaults like is_admin) are in the DataFrame
-        # Fetching the table metadata using SQLAlchemy to validate columns and apply defaults
         session = Session()
-        
-        # Wrapping the PRAGMA query in the text() function
+
+        # Ensure all required columns (including those with defaults like is_admin) are in the DataFrame
         table_metadata = session.execute(text(f"PRAGMA table_info({table_name})")).fetchall()
-        session.close()
 
         table_columns = {col[1]: col for col in table_metadata}  # Dictionary of column names and info
-        
-        # Adding missing columns with default values to df, if necessary
+
+        # Check if the primary key (email in this case) already exists in the database
+        conflict_column = df.columns[0]  # Assuming the first column (email) is the conflict target (primary key)
+        existing_record = session.execute(
+            text(f"SELECT * FROM {table_name} WHERE {conflict_column} = :conflict_value"),
+            {'conflict_value': df.iloc[0][conflict_column]}
+        ).fetchone()
+
+        # If the user exists, ensure we keep their password if it's not in the DataFrame
+        if existing_record:
+            for col_name, col_info in table_columns.items():
+                if col_name == 'password' and col_name not in df.columns:  # Fetch the existing password
+                    df[col_name] = existing_record.password
+
+        # Add default values for missing columns, if necessary
         for col_name, col_info in table_columns.items():
             if col_name not in df.columns and col_info[4] is not None:  # col_info[4] is the default value
                 df[col_name] = col_info[4]  # Assign the default value to the missing column
 
-        # Extract column names and values from the DataFrame
+        # Prepare the insert/update SQL
         columns = df.columns.tolist()
         values = df.iloc[0].to_dict()  # Assuming one row; extend logic if multiple rows
 
         # Build the SQL command with placeholders (let SQLAlchemy handle the type conversion)
         column_names = ', '.join(columns)
-        value_placeholders = ', '.join([f":{col}" for col in columns])  # Use parameter placeholders
+        value_placeholders = ', '.join([f":{col}" for col in columns])
 
-        # Generate conflict target, assuming the first column is the primary key or unique constraint
-        conflict_target = columns[0]  # The first column is assumed to be the conflict target (primary key)
-
-        # Build the SET clause for updating on conflict (skip conflict_target in update)
+        # Conflict target is assumed to be the first column (e.g., email)
+        conflict_target = columns[0]
         set_clause = ', '.join([f"{col} = :{col}" for col in columns if col != conflict_target])
 
         # Construct the full UPSERT SQL command with placeholders
@@ -120,19 +129,20 @@ def upsert_data(table_name, df):
         DO UPDATE SET {set_clause};
         """
 
-        # Execute the UPSERT operation
-        session = Session()
+        # Execute the UPSERT
         session.execute(text(cmd_text), values)
-        session.commit()  # Commit the transaction
+        session.commit()
 
         print("UPSERT operation completed successfully.")
         return True
     except Exception as e:
-        session.rollback()  # Rollback in case of error
+        if session:
+            session.rollback()  # Rollback in case of error
         print(f"Error during UPSERT operation: {e}")
         return False
     finally:
-        session.close()
+        if session:
+            session.close()
 
 
 
