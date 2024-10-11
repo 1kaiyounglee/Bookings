@@ -3,7 +3,7 @@ from helper_modules import db_helper as db
 import pandas as pd
 
 
-def update_user(email, password, is_admin=False):
+def update_admin(email,is_admin=True):
     """
     Create or update a user in the Users table.
     
@@ -16,7 +16,6 @@ def update_user(email, password, is_admin=False):
     try:
         user_data = pd.DataFrame({
             'email': [email],
-            'password': [password],
             'is_admin': [is_admin]
         })
         
