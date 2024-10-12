@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Box, Typography, TextField, MenuItem, Slider, Grid } from '@mui/material';
 import { Formik, Field } from 'formik';
+import { useNavigate } from 'react-router-dom'; // Import useNavigate
 import { getPackagesGeneral, getDistinctLocations, getCategories } from '../HelperFunctions/GetDatabaseModels';
 
 function BrowsePackages() {
@@ -9,6 +10,7 @@ function BrowsePackages() {
   const [locations, setLocations] = useState([]);
   const [themes, setThemes] = useState([]);
   const [loading, setLoading] = useState(true);
+  const navigate = useNavigate(); // Initialize useNavigate
 
   // Fetch the packages, themes, and locations when the component loads
   useEffect(() => {
@@ -150,7 +152,14 @@ function BrowsePackages() {
         ) : (
           <Grid container spacing={3}>
             {filteredPackages.map((pkg, index) => (
-              <Grid item xs={12} md={6} key={index}>
+              <Grid
+                item
+                xs={12}
+                md={6}
+                key={index}
+                onClick={() => navigate(`/package/${pkg.package_id}`)} // Add click event to navigate
+                sx={{ cursor: 'pointer' }} // Make it look clickable
+              >
                 <Box
                   sx={{
                     border: '1px solid #ccc',
