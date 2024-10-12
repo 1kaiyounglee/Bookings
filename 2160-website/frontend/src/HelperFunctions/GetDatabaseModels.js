@@ -324,3 +324,20 @@ export async function getBookings() {
   });
   return bookings;
 }
+
+
+// Function to fetch locations (city and country)
+export async function getLocations() {
+  const query = `SELECT location_id, city, country FROM Locations`;
+  const data = await fetchDatabaseData(query);
+
+  if (!data) {
+    throw new Error("Failed to fetch location data");
+  }
+
+  return data.map(location => ({
+    location_id: location.location_id,
+    city: location.city,
+    country: location.country
+  }));
+}
