@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Box, Typography, Button, Snackbar, Alert } from '@mui/material';
 import ArrowBackIos from '@mui/icons-material/ArrowBackIos';
 import { useNavigate } from 'react-router-dom';
@@ -59,7 +59,7 @@ function Cart({ user }) {
     setEditModalOpen(true); // Open the modal
   };
 
-  const fetchCartItems = useCallback(async () => {
+  const fetchCartItems = async () => {
     try {
       const items = await getCartItems(user.email);  // Call getCartItems function
       setCartItems(items || []);
@@ -68,7 +68,7 @@ function Cart({ user }) {
     } finally {
       setLoading(false);  // Stop loading after data is fetched
     }
-  }, [user.email]);
+  };
 
 
   useEffect(() => {
@@ -252,7 +252,7 @@ const CartItem = ({ item, handlePackageClick, handleRemoveItem, openEditModal })
         <Button variant="contained" onClick={() => openEditModal(item)} color="primary" sx={{ minWidth: '100px'}}>
           Edit
         </Button>
-        <Button minWidth='200px'variant="contained" onClick={() => handleRemoveItem(item)} color="error" sx={{ minWidth: '100px'}}>
+        <Button variant="contained" onClick={() => handleRemoveItem(item)} color="error" sx={{ minWidth: '100px'}}>
           Delete
         </Button>
       </Box>
