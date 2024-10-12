@@ -3,7 +3,7 @@ import { Dialog, DialogActions, DialogContent, DialogTitle, TextField, Button, B
 import { DatePicker } from '@mui/x-date-pickers/DatePicker';
 import addDays from 'date-fns/addDays';
 
-const EditPackageModal = ({ open, onClose, item, handleUpdateItem, handleRemoveItem }) => {
+const EditPackageModal = ({ open, onClose, item, handleUpdateItem}) => {
   // Convert dates to Date objects if they are strings
   const [startDate, setStartDate] = useState(new Date(item.startDate));
   const [endDate, setEndDate] = useState(new Date(item.endDate));
@@ -56,14 +56,6 @@ const EditPackageModal = ({ open, onClose, item, handleUpdateItem, handleRemoveI
         </Box>
       </DialogContent>
       <DialogActions sx={{ display: 'flex', justifyContent: 'center', gap: 1, mt: 2 }}>
-        <Button
-          onClick={() => handleRemoveItem(item)}
-          variant="contained"
-          color="error"
-          sx={{ minWidth: '190px' }}
-        >
-          REMOVE FROM CART
-        </Button>
         <Button
           onClick={onClose}
           variant="contained"
