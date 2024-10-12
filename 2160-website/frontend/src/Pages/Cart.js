@@ -109,7 +109,7 @@ function Cart({ user }) {
                 <CartItem key={index} item={item} handlePackageClick={handlePackageClick} openEditModal={openEditModal} />
               ))
             ) : (
-              <Typography>No items in cart.</Typography>
+              <Typography se={{  textAlign: 'center' }}>No items in cart.</Typography>
             )}
           </Box>
 
