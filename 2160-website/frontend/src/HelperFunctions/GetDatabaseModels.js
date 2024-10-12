@@ -104,13 +104,13 @@ export async function getPackages() {
     return {
       package_id: pkg.package_id,
       name: pkg.name, // Package name
-      description: pkg.description || "MISSING",
-      duration: pkg.duration || "MISSING",
-      price: pkg.price || "MISSING",
-      location: pkg.location || "MISSING", // Ensure the location is included
-      images: imagePaths || [],
+      description: pkg.description ,
+      duration: pkg.duration ,
+      price: pkg.price ,
+      location: pkg.location , // Ensure the location is included
+      images: imagePaths,
       hasImages: hasImages,
-      categories: relatedCategories.length > 0 ? relatedCategories.map((cat) => cat.category_id) : ["MISSING"]
+      categories: relatedCategories.length > 0 ? relatedCategories.map((cat) => cat.category_id) : []
     };
   });
 
@@ -274,14 +274,14 @@ export async function getPackagesGeneral(whereClause = "") {
     return {
       package_id: pkg.package_id,
       name: pkg.name, // Package name
-      description: pkg.description || "MISSING",
-      duration: pkg.duration || "MISSING",
-      price: pkg.price || "MISSING",
-      location_city: pkg.location_city || "MISSING",
-      location_country: pkg.location_country || "MISSING",
-      images: imagePaths || [],
+      description: pkg.description ,
+      duration: pkg.duration ,
+      price: pkg.price ,
+      location_city: pkg.location_city ,
+      location_country: pkg.location_country ,
+      images: imagePaths,
       hasImages: hasImages,
-      categories: themeNames.length > 0 ? themeNames : ["MISSING"] // Now returns theme names instead of IDs
+      categories: themeNames.length > 0 ? themeNames : [] // Now returns theme names instead of IDs
     };
   });
 

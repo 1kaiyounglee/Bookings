@@ -36,7 +36,6 @@ function ManageBookingsModal({ open, onClose }) {
   // Fetch all bookings and update state
   async function fetchBookings() {
     const bookingsData = await getBookings();
-    console.log("BOOKINGS DATA", bookingsData);
     setBookings(bookingsData);
   }
 
@@ -47,30 +46,43 @@ function ManageBookingsModal({ open, onClose }) {
     }
   }, [open]);
 
+  // Function to filter unique emails
+  const getUniqueEmails = () => {
+    const uniqueEmails = [...new Set(bookings.map((booking) => booking.email))];
+    return uniqueEmails;
+  };
+
   // Update filtered packages when email changes
   const handleEmailChange = (email, setFieldValue) => {
     const userBookings = bookings.filter((booking) => booking.email === email);
-    setFilteredPackages([...new Set(userBookings.map((booking) => ({
-      package_id: booking.package_id,
+    const uniquePackages = [...new Set(userBookings.map((booking) => ({
       package_name: booking.package_name,
-    })))]);
+      booking_id: booking.booking_id,  // Track booking_id for this package
+    })))];
+    setFilteredPackages(uniquePackages);
     setFieldValue('package_name', '');
     setFieldValue('date', '');
     setFieldValue('status', '');
+    setSelectedBooking(null); // Clear previous booking selection
   };
 
   // Update filtered dates when package changes
   const handlePackageChange = (packageName, setFieldValue) => {
     const packageBookings = bookings.filter((booking) => booking.package_name === packageName);
-    setFilteredDates(packageBookings.map((booking) => `${booking.start_date} - ${booking.end_date}`));
+    const uniqueDates = [...new Set(packageBookings.map((booking) => ({
+      date: `${booking.start_date} - ${booking.end_date}`,
+      booking_id: booking.booking_id,  // Track booking_id for this date
+    })))];
+    setFilteredDates(uniqueDates);
     setFieldValue('date', '');
     setFieldValue('status', '');
+    setSelectedBooking(null); // Clear previous booking selection
   };
 
-  // Update status when date changes
+  // Update status and booking when date changes
   const handleDateChange = (date, setFieldValue) => {
-    const [startDate] = date.split(' - ');
-    const booking = bookings.find((booking) => booking.start_date === startDate);
+    const selectedDate = filteredDates.find(d => d.date === date);
+    const booking = bookings.find((booking) => booking.booking_id === selectedDate.booking_id);
     setSelectedBooking(booking);
     setFieldValue('status', booking?.status || '');
   };
@@ -160,9 +172,9 @@ function ManageBookingsModal({ open, onClose }) {
                     label: { color: 'white' },
                   }}
                 >
-                  {bookings.map((booking, index) => (
-                    <MenuItem key={index} value={booking.email}>
-                      {booking.email}
+                  {getUniqueEmails().map((email, index) => (
+                    <MenuItem key={index} value={email}>
+                      {email}
                     </MenuItem>
                   ))}
                 </TextField>
@@ -224,9 +236,9 @@ function ManageBookingsModal({ open, onClose }) {
                   }}
                   disabled={!values.package_name}
                 >
-                  {filteredDates.map((date, index) => (
-                    <MenuItem key={index} value={date}>
-                      {date}
+                  {filteredDates.map((dateObj, index) => (
+                    <MenuItem key={index} value={dateObj.date}>
+                      {dateObj.date}
                     </MenuItem>
                   ))}
                 </TextField>

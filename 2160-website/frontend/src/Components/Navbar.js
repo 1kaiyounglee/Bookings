@@ -4,8 +4,8 @@ import LogoutIcon from '@mui/icons-material/Logout';
 import AdminPanelSettingsRoundedIcon from '@mui/icons-material/AdminPanelSettingsRounded';
 import AccountCircleRoundedIcon from '@mui/icons-material/AccountCircleRounded'; // Import the account icon
 import ShoppingCartRoundedIcon from '@mui/icons-material/ShoppingCartRounded';
-import HikingRoundedIcon from '@mui/icons-material/HikingRounded';
-import LibraryBooksRoundedIcon from '@mui/icons-material/LibraryBooksRounded';
+import TravelExploreRoundedIcon from '@mui/icons-material/TravelExploreRounded';
+import AutoStoriesRoundedIcon from '@mui/icons-material/AutoStoriesRounded';
 import { useNavigate } from 'react-router-dom';
 
 function Navbar({ onLoginRegisterClick, handleLogout, user }) {
@@ -52,12 +52,12 @@ function Navbar({ onLoginRegisterClick, handleLogout, user }) {
           <Box sx={{ display: 'flex', gap: '10px' }}> {/* Group buttons with spacing */}
           <Tooltip title="Browse Packages">
               <IconButton color="inherit" onClick={handleBrowsePackagesClick}>
-                <HikingRoundedIcon />
+                <TravelExploreRoundedIcon />
               </IconButton>
             </Tooltip>
             <Tooltip title="My Bookings">
               <IconButton color="inherit" onClick={handleBookingsClick}>
-                <LibraryBooksRoundedIcon />
+                <AutoStoriesRoundedIcon />
               </IconButton>
             </Tooltip>
             <Tooltip title="Cart">
