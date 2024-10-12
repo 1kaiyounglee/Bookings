@@ -107,14 +107,12 @@ function App() {
           {/* Define the Routes */}
           <Routes>
             <Route path="/" element={<HomePage />} />
-            <Route path="/package/:packageId" element={<PackageDetails />} />
+            <Route path="/package/:packageId" element={<PackageDetails user={user}/>} />
             {user.isLoggedIn && <Route path="/bookings" element={<MyBookings user={user}/>} />}
             {user.isLoggedIn && <Route path="/cart" element={<Cart user = {user}/>}/>}
             {user.isAdmin && <Route path="/admin" element={<AdminPanel user={user}/>} />}  {/* Admin route */}
             <Route path="/account" element={<Account user={user} />} />
             <Route path="/browse-packages" element={<BrowsePackages />} />
-
-
           </Routes>
 
           <LoginModal

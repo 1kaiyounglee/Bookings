@@ -8,7 +8,7 @@ import HikingRoundedIcon from '@mui/icons-material/HikingRounded';
 import LibraryBooksRoundedIcon from '@mui/icons-material/LibraryBooksRounded';
 import { useNavigate } from 'react-router-dom';
 
-function Navbar({ onLoginRegisterClick, isLoggedIn, handleLogout, user }) {
+function Navbar({ onLoginRegisterClick, handleLogout, user }) {
   const navigate = useNavigate();
 
   const handleBookingsClick = () => {

@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
 import { getPackagesGeneral } from '../HelperFunctions/GetDatabaseModels';
-import { Box, Typography, Button, TextField, IconButton, Modal } from '@mui/material';
+import { Box, Typography, Button, TextField, IconButton, Modal, Snackbar, Alert } from '@mui/material';
 import ArrowBackIos from '@mui/icons-material/ArrowBackIos';
 import ArrowForwardIos from '@mui/icons-material/ArrowForwardIos';
 import { DatePicker } from '@mui/x-date-pickers/DatePicker';
@@ -9,8 +9,9 @@ import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
 import { AdapterDateFns } from '@mui/x-date-pickers/AdapterDateFns';
 import { enGB } from 'date-fns/locale';
 import addDays from 'date-fns/addDays';
+import { insertBooking } from '../HelperFunctions/SendData';
 
-function PackageDetails() {
+function PackageDetails({ user }) {
   const { packageId } = useParams();
   const [packageData, setPackageData] = useState(null);
   const [numTravellers, setNumTravellers] = useState(1);
@@ -18,6 +19,10 @@ function PackageDetails() {
   const [endDate, setEndDate] = useState(null);
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
   const [openModal, setOpenModal] = useState(false);  // State to manage modal open/close
+  const [snackbarMessage, setSnackbarMessage] = useState('');
+  const [snackbarOpen, setSnackbarOpen] = useState(false);
+  const [snackbarSeverity, setSnackbarSeverity] = useState('success');
+  const [isAddedToCart, setisAddedToCart] = useState(false);
 
   useEffect(() => {
     async function fetchPackage() {
@@ -63,9 +68,41 @@ function PackageDetails() {
     setCurrentImageIndex((prev) => (prev - 1 + packageData.images.length) % packageData.images.length);
   };
 
-  const handleAddToCart = () => {
+  const showSnackbar = (message, severity) => {
+    setSnackbarMessage(message);
+    setSnackbarSeverity(severity);
+    setSnackbarOpen(true);
+  };
 
-  }
+  const handleSnackbarClose = () => {
+    setSnackbarOpen(false);
+  };
+
+  const handleAddToCartClick = async () => {
+    try {
+      if (!user.isLoggedIn) {
+        showSnackbar('Please log in before adding a package to the cart.', 'warning')
+        return;
+      }
+      if (!startDate || !endDate) {
+        showSnackbar("Please select a start and end date.", 'warning')
+        return;
+      }
+      const email = user.email;
+      const bookingData = {
+        packageId: packageId,
+        startDate: startDate.toISOString().split('T')[0],
+        endDate: endDate.toISOString().split('T')[0],
+        numTravellers: numTravellers,
+        price: packageData.price * numTravellers,
+      }
+      await insertBooking(email, bookingData);
+      showSnackbar('Package added to cart!')
+      setisAddedToCart(true);
+    } catch (error) {
+      console.error('Error adding to cart:', error)
+    }
+  };
 
   if (!packageData) {
     return <div>Loading...</div>;
@@ -156,8 +193,12 @@ function PackageDetails() {
                     disablePast
                   />
 
-                  <Button variant="contained" color="primary" onClick={handleAddToCart}>
-                    Add to Cart
+                  <Button 
+                    variant="contained" 
+                    color={isAddedToCart ? "success" : "primary"} 
+                    onClick={isAddedToCart ? null : handleAddToCartClick}
+                  >
+                    {isAddedToCart ? "Added to Cart" : "Add to Cart"}
                   </Button>
                 </Box>
               </LocalizationProvider>
@@ -218,7 +259,15 @@ function PackageDetails() {
           )}
         </Box>
       </Modal>
-
+      <Snackbar
+        open={snackbarOpen}
+        autoHideDuration={3000}
+        onClose={handleSnackbarClose}
+      >
+        <Alert onClose={handleSnackbarClose} severity={snackbarSeverity} sx={{ width: '100%' }}>
+          {snackbarMessage}
+        </Alert>
+      </Snackbar>
     </>
   );
 }

@@ -2,7 +2,6 @@ import React, { useState } from 'react';
 import { Dialog, DialogActions, DialogContent, DialogTitle, TextField, Button, Box } from '@mui/material';
 import { DatePicker } from '@mui/x-date-pickers/DatePicker';
 import addDays from 'date-fns/addDays';
-import { InsertEmoticon } from '@mui/icons-material';
 
 const EditPackageModal = ({ open, onClose, item, handleUpdateItem, handleRemoveItem }) => {
   // Convert dates to Date objects if they are strings

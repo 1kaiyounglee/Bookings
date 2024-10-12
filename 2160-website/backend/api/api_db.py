@@ -130,7 +130,7 @@ def update_booking():
     data = request.json
     try:
         booking_data = {
-            'booking_id': data['booking_id'],
+            'booking_id': data.get('booking_id', None),
             'email': data['email'],
             'package_id': data['package_id'],
             'start_date': data['start_date'],
