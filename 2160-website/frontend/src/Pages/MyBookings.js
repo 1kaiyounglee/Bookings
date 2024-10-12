@@ -82,7 +82,7 @@ const formatDate = (dateString) => {
 
 // Component to render each item in an order history
 const OrderItem = ({ item, handlePackageClick }) => (
-  <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 2, padding: '10px', border: '2px solid #ccc', borderRadius: '8px' }}>
+  <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 2, padding: '10px', border: '0', borderRadius: '8px' }}>
     {/* Package Image */}
     <Box sx={{ width: '275px', height: '150px', overflow: 'hidden', mr: 3 }}>
       {item.image ? (
@@ -108,8 +108,8 @@ const OrderItem = ({ item, handlePackageClick }) => (
 
     {/* Dates and Status */}
     <Box sx={{ display: 'flex', flexDirection: 'column', justifyContent: 'center', gap: 2 }}>
-      <Typography>Start Date: {formatDate(item.startDate)}</Typography>
-      <Typography>End Date: {formatDate(item.endDate)}</Typography>
+      <Typography>Start : {formatDate(item.startDate)}</Typography>
+      <Typography>End : {formatDate(item.endDate)}</Typography>
       <Typography sx={{ textTransform: 'capitalize' }}>Status: {item.status}</Typography>
       <Typography>Price: ${item.price}</Typography>
     </Box>
