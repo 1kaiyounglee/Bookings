@@ -223,3 +223,29 @@ export async function deletePackage(packageId) {
     throw error;
   }
 }
+
+export async function changePassword({ email, currentPassword, newPassword }) {
+  try {
+    const response = await fetch('http://localhost:5000/api/database/change_password', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        email,
+        current_password: currentPassword,
+        new_password: newPassword,
+      }),
+    });
+
+    if (!response.ok) {
+      const errorData = await response.json();
+      throw new Error(errorData.error || 'Unknown error occurred');
+    }
+
+    return await response.json();
+  } catch (error) {
+    console.error('Error changing password:', error, error.message);
+    return { error: error.message || 'Unknown error occurred' };
+  }
+}
