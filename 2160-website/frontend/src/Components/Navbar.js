@@ -4,6 +4,8 @@ import LogoutIcon from '@mui/icons-material/Logout';
 import AdminPanelSettingsRoundedIcon from '@mui/icons-material/AdminPanelSettingsRounded';
 import AccountCircleRoundedIcon from '@mui/icons-material/AccountCircleRounded'; // Import the account icon
 import ShoppingCartRoundedIcon from '@mui/icons-material/ShoppingCartRounded';
+import HikingRoundedIcon from '@mui/icons-material/HikingRounded';
+import LibraryBooksRoundedIcon from '@mui/icons-material/LibraryBooksRounded';
 import { useNavigate } from 'react-router-dom';
 
 function Navbar({ onLoginRegisterClick, isLoggedIn, handleLogout, user }) {
@@ -33,6 +35,10 @@ function Navbar({ onLoginRegisterClick, isLoggedIn, handleLogout, user }) {
     navigate('/');
   }
 
+  const handleBrowsePackagesClick = () => {
+    navigate('/browse-packages'); // Add your account route if applicable
+  };
+
   return (
     <AppBar position="static">
       <Toolbar sx={{ justifyContent: 'space-between' }}>
@@ -44,9 +50,16 @@ function Navbar({ onLoginRegisterClick, isLoggedIn, handleLogout, user }) {
         </Button>
         {user.isLoggedIn ? (
           <Box sx={{ display: 'flex', gap: '10px' }}> {/* Group buttons with spacing */}
-            <Button color="inherit" onClick={handleBookingsClick}>
-              My Bookings
-            </Button>
+          <Tooltip title="Browse Packages">
+              <IconButton color="inherit" onClick={handleBrowsePackagesClick}>
+                <HikingRoundedIcon />
+              </IconButton>
+            </Tooltip>
+            <Tooltip title="My Bookings">
+              <IconButton color="inherit" onClick={handleBookingsClick}>
+                <LibraryBooksRoundedIcon />
+              </IconButton>
+            </Tooltip>
             <Tooltip title="Cart">
               <IconButton color="inherit" onClick={handleCartClick}>
                 <ShoppingCartRoundedIcon />

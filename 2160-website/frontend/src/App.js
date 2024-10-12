@@ -6,10 +6,11 @@ import LoginModal from './Components/LoginModal';
 import RegisterModal from './Components/RegisterModal';
 import Navbar from './Components/Navbar';
 import HomePage from './Pages/HomePage';
-import Account from './Pages/Account'
+import Account from './Pages/Account';
 import PackageDetails from './Pages/PackageDetails';
 import MyBookings from './Pages/MyBookings';
-import Cart from './Pages/Cart'
+import Cart from './Pages/Cart';
+import BrowsePackages from './Pages/BrowsePackages';
 import AdminPanel from './Pages/AdminPanel';  // Import AdminPanel page
 import { deepPurple } from '@mui/material/colors';
 const darkTheme = createTheme({
@@ -111,6 +112,8 @@ function App() {
             {user.isLoggedIn && <Route path="/cart" element={<Cart user = {user}/>}/>}
             {user.isAdmin && <Route path="/admin" element={<AdminPanel user={user}/>} />}  {/* Admin route */}
             <Route path="/account" element={<Account user={user} />} />
+            <Route path="/browse-packages" element={<BrowsePackages />} />
+
 
           </Routes>
 

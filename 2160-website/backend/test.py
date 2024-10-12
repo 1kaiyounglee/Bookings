@@ -1,7 +1,7 @@
 from helper_modules import db_helper as db, util as ut
 from datetime import datetime
 query1 = """
-SELECT * FROM Users"""
+SELECT * FROM Packages"""
 data = db.fetch_data(query1)
 print(data)
 # ut.update_admin('austingod1@gmail.com')
