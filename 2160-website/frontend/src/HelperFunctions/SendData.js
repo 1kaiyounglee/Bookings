@@ -178,51 +178,29 @@ export async function removeCartItem(item) {
   }
 }
 
-// ==================== Package Management Functions ====================
-
-// Add a new package
-export async function addPackage(packageData) {
+/// Upsert a package (add or update)
+export async function upsertPackage(packageData) {
   try {
-    const response = await fetch('http://localhost:5000/api/database/add_package', {
+    console.log(JSON.stringify(packageData));
+    const response = await fetch('http://localhost:5000/api/database/upsert_package', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
       },
       body: JSON.stringify(packageData),
     });
-
+    console.log("REPSONSE:", response);
     if (!response.ok) {
-      throw new Error('Failed to add package');
+      throw new Error('Failed to upsert package');
     }
 
     return await response.json();
   } catch (error) {
-    console.error('Error adding package:', error);
+    console.error('Error upserting package:', error);
     throw error;
   }
 }
 
-// Update an existing package
-export async function updatePackage(packageId, packageData) {
-  try {
-    const response = await fetch('http://localhost:5000/api/database/update_package', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({ package_id: packageId, ...packageData }),
-    });
-
-    if (!response.ok) {
-      throw new Error('Failed to update package');
-    }
-
-    return await response.json();
-  } catch (error) {
-    console.error('Error updating package:', error);
-    throw error;
-  }
-}
 
 // Delete a package
 export async function deletePackage(packageId) {

@@ -149,33 +149,31 @@ def update_booking():
     except Exception as e:
         return jsonify({"error": str(e)}), 500
     
-@api_db.route('/add_package', methods=['POST'])
-def add_package():
+@api_db.route('/upsert_package', methods=['POST'])
+def upsert_package():
+    
     data = request.json
+    print(data)
     try:
-        # Insert the new package into the database
-        query = """
-        INSERT INTO Packages (package_id, name, description, location_id, duration, price)
-        VALUES (:package_id, :name, :description, :location_id, :duration, :price)
-        """
-        db.execute_query(query, data)
-        return jsonify({"message": "Package added successfully"}), 201
-    except Exception as e:
-        return jsonify({"error": str(e)}), 500
+        # Extracting all necessary fields for package data
+        package_data = {
+            'package_id': data['package_id'],  # Auto-increment for new records
+            'name': data['name'],
+            'description': data['description'],
+            'location_id': data['location_id'],
+            'duration': data['duration'],
+            'price': data['price']
+        }
 
-@api_db.route('/update_package', methods=['POST'])
-def update_package():
-    data = request.json
-    try:
-        # Update the package details
-        query = """
-        UPDATE Packages
-        SET name = :name, description = :description, location_id = :location_id, 
-            duration = :duration, price = :price
-        WHERE package_id = :package_id
-        """
-        db.execute_query(query, data)
-        return jsonify({"message": "Package updated successfully"}), 200
+        print(f"Upserting package with data: {package_data}")
+        df = pd.DataFrame([package_data])
+        print(df)
+        success = db.upsert_data('Packages', df)
+
+        if success:
+            return jsonify({"message": "Package upserted successfully"}), 200
+        else:
+            return jsonify({"message": "Failed to upsert package"}), 500
     except Exception as e:
         return jsonify({"error": str(e)}), 500
 
