@@ -1,13 +1,14 @@
 import React, { useState, useEffect } from 'react';
 import { createTheme, ThemeProvider } from '@mui/material/styles';
 import { Box, CircularProgress, Backdrop } from '@mui/material';
-import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
+import { BrowserRouter as Router, Route, Routes} from 'react-router-dom';
 import LoginModal from './Components/LoginModal';
 import RegisterModal from './Components/RegisterModal';
 import Navbar from './Components/Navbar';
 import HomePage from './Pages/HomePage';
-import MyBookings from './Pages/MyBookings';
 import PackageDetails from './Pages/PackageDetails';
+import MyBookings from './Pages/MyBookings';
+import Cart from './Pages/Cart'
 import AdminPanel from './Pages/AdminPanel';  // Import AdminPanel page
 import { deepPurple } from '@mui/material/colors';
 
@@ -106,8 +107,9 @@ function App() {
           <Routes>
             <Route path="/" element={<HomePage />} />
             <Route path="/package/:packageId" element={<PackageDetails />} />
-            <Route path="/bookings" element={<MyBookings />} />
-            {user.isAdmin && <Route path="/admin" element={<AdminPanel />} />}  {/* Admin route */}
+            {user.isLoggedIn && <Route path="/bookings" element={<MyBookings user={user}/>} />}
+            {user.isLoggedIn && <Route path="/cart" element={<Cart user = {user}/>}/>}
+            {user.isAdmin && <Route path="/admin" element={<AdminPanel user={user}/>} />}  {/* Admin route */}
           </Routes>
 
           <LoginModal

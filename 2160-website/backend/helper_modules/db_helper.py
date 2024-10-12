@@ -144,9 +144,38 @@ def upsert_data(table_name, df):
     finally:
         if session:
             session.close()
-
   
+def execute_query(query, params=None):
+    """
+    Executes a given SQL query and returns the result.
+    
+    Args:
+        query (str): The SQL query to execute.
+        params (dict): Optional dictionary of parameters to bind to the query.
+    
+    Returns:
+        ResultProxy: The result of the query execution (can be iterated over for SELECT queries).
+    """
+    session = None
+    try:
+        session = Session()  # Get a new database session
 
+        if params:
+            result = session.execute(text(query), params)
+        else:
+            result = session.execute(text(query))
+
+        session.commit()  # Commit the transaction if it's a modification query (e.g., DELETE, UPDATE, INSERT)
+
+        return result  # Return the result object for further processing (e.g., row count for DELETE)
+    except Exception as e:
+        if session:
+            session.rollback()  # Rollback the transaction in case of error
+        print(f"Error executing query: {traceback.format_exc()}")
+        return None
+    finally:
+        if session:
+            session.close()  # Always close the session after the query is done
 
 def make_backup(tablename):
     # Fetch the data

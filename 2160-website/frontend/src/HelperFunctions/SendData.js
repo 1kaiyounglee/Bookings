@@ -1,37 +1,34 @@
-import { getData } from './GetDatabaseModels';  // Import the getUsers function
-
-
-
+import { getData } from './GetDatabaseModels';  // Import the getData function
 
 export const registerUser = async (values) => {
-    try {
-      const response = await fetch('http://localhost:5000/api/database/create_user', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-            email: values.email,
-            password: values.password,
-            first_name: values.firstName,
-            last_name: values.lastName,
-            phone_number: values.phone_number,
-            is_admin: false,
-        }),
-      });
-  
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.error || 'Unknown error occurred');
-      }
-  
-      return await response.json(); // Return the response data
-    } catch (error) {
-      console.error('Error creating user:', error.message);
-      return { error: error.message || 'Unknown error occurred' };
+  try {
+    const response = await fetch('http://localhost:5000/api/database/create_user', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        email: values.email,
+        password: values.password,
+        first_name: values.firstName,
+        last_name: values.lastName,
+        phone_number: values.phone_number,
+        is_admin: false,
+      }),
+    });
+
+    if (!response.ok) {
+      const errorData = await response.json();
+      throw new Error(errorData.error || 'Unknown error occurred');
     }
-  };
-  
+
+    return await response.json(); // Return the response data
+  } catch (error) {
+    console.error('Error creating user:', error.message);
+    return { error: error.message || 'Unknown error occurred' };
+  }
+};
+
 export async function handleLogin(values) {
   const response = await fetch('http://localhost:5000/api/auth/login', {
     method: 'POST',
@@ -55,26 +52,19 @@ export async function handleLogin(values) {
   }
 }
 
-
 export async function updateAdmin(email, isAdmin) {
   try {
-    // Fetch all users using the getUsers function and find the specific user by email
     const users = await getData("Users",`email = '${email}'`);
     if (!users || users.length === 0) {
       throw new Error('User not found');
     }
     
-    const user = users[0];  // Get the first user (assuming there's only one with the given email)
-    console.log("askldsakldlaskdjklsa", user);
-    // Update the isAdmin field while keeping other fields intact
+    const user = users[0];  
     const updatedUserData = {
       ...user,
-      is_admin: isAdmin ? true : false,  // Update the isAdmin field to match the new value
+      is_admin: isAdmin ? true : false,  
     };
 
-    console.log('Sending updated user data:', updatedUserData);  // Log the data being sent to the backend
-
-    // Call the UPSERT endpoint for users
     const response = await fetch('http://localhost:5000/api/database/update_user', {
       method: 'POST',
       headers: {
@@ -87,7 +77,7 @@ export async function updateAdmin(email, isAdmin) {
       throw new Error('Failed to update user admin status');
     }
 
-    return await response.json();  // Return the response data
+    return await response.json(); 
   } catch (error) {
     console.error('Error updating admin status:', error);
     throw error;
@@ -96,29 +86,162 @@ export async function updateAdmin(email, isAdmin) {
 
 export async function updateBooking(bookingId, status) {
   const bookings = await getData("Bookings",`booking_id = '${bookingId}'`);
-    if (!bookings || bookings.length === 0) {
-      throw new Error('User not found');
-    }
-    
+  if (!bookings || bookings.length === 0) {
+    throw new Error('Booking not found');
+  }
+  
   const booking = bookings[0]; 
-  // Define the booking data for UPSERT
   const bookingData = {
-      ...booking,
-      status: status
+    ...booking,
+    status: status
   };
 
-  // Call the UPSERT endpoint for bookings
   const response = await fetch('http://localhost:5000/api/database/update_booking', {
-      method: 'POST',
-      headers: {
-          'Content-Type': 'application/json',
-      },
-      body: JSON.stringify(bookingData),
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify(bookingData),
   });
 
   if (!response.ok) {
-      throw new Error('Failed to update booking status');
+    throw new Error('Failed to update booking status');
   }
 
   return await response.json();
+}
+
+export async function updateCartItem(item, newStartDate, newEndDate, newTravellers) {
+  try {
+    const bookings = await getData("Bookings", `booking_id = ${item.bookingId}`);
+    if (!bookings || bookings.length === 0) {
+      throw new Error('Booking not found');
+    }
+
+    const booking = bookings[0];
+    const updatedBookingData = {
+      booking_id: item.bookingId,
+      email: booking.email,
+      package_id: item.packageId,
+      start_date: newStartDate.toISOString().split('T')[0],
+      end_date: newEndDate.toISOString().split('T')[0],
+      number_of_travellers: newTravellers,
+      price: item.price * newTravellers,
+      status: 'in-cart',
+    };
+
+    const response = await fetch('http://localhost:5000/api/database/update_booking', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(updatedBookingData),
+    });
+
+    if (!response.ok) {
+      throw new Error('Failed to update cart item');
+    }
+
+    return await response.json();
+  } catch (error) {
+    console.error('Error updating cart item:', error);
+    throw error;
+  }
+}
+
+export async function removeCartItem(item) {
+  try {
+    const bookings = await getData("Bookings", `booking_id = ${item.bookingId}`);
+    if (!bookings || bookings.length === 0) {
+      throw new Error('Booking not found');
+    }
+
+    const response = await fetch('http://localhost:5000/api/database/delete_entry', {
+      method: 'DELETE',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ 
+        table: 'Bookings',
+        id: item.bookingId
+      }),
+    });
+
+    if (!response.ok) {
+      throw new Error('Failed to delete cart item');
+    }
+
+    return await response.json();
+  } catch (error) {
+    console.error('Error deleting cart item:', error);
+    throw error;
+  }
+}
+
+// ==================== Package Management Functions ====================
+
+// Add a new package
+export async function addPackage(packageData) {
+  try {
+    const response = await fetch('http://localhost:5000/api/database/add_package', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(packageData),
+    });
+
+    if (!response.ok) {
+      throw new Error('Failed to add package');
+    }
+
+    return await response.json();
+  } catch (error) {
+    console.error('Error adding package:', error);
+    throw error;
+  }
+}
+
+// Update an existing package
+export async function updatePackage(packageId, packageData) {
+  try {
+    const response = await fetch('http://localhost:5000/api/database/update_package', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ package_id: packageId, ...packageData }),
+    });
+
+    if (!response.ok) {
+      throw new Error('Failed to update package');
+    }
+
+    return await response.json();
+  } catch (error) {
+    console.error('Error updating package:', error);
+    throw error;
+  }
+}
+
+// Delete a package
+export async function deletePackage(packageId) {
+  try {
+    const response = await fetch('http://localhost:5000/api/database/delete_package', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ package_id: packageId }),
+    });
+
+    if (!response.ok) {
+      throw new Error('Failed to delete package');
+    }
+
+    return await response.json();
+  } catch (error) {
+    console.error('Error deleting package:', error);
+    throw error;
+  }
 }

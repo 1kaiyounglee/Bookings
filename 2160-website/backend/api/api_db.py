@@ -30,6 +30,37 @@ def execute_query():
         print(str(e))
         return jsonify({'error': str(e)}), 500
 
+# deletes an entry from a specific table
+# i'm using this for the remove from cart feature so idk if it will work properly with other things lol
+# nvrm just hard coded in the tablename and primary key hahaha
+@api_db.route('/delete_entry', methods=['DELETE'])
+def delete_entry():
+    try:
+        # Get the table name and conditions for deletion from the frontend request
+        data = request.json
+        table_name = data.get('table')
+        entry_id = data.get('id')
+
+        if not table_name or not entry_id:
+            return jsonify({'error': 'Table name or entry id for deletion not provided.'}), 400
+
+        # Construct the SQL delete query dynamically
+        delete_query = f"DELETE FROM {table_name} WHERE booking_id = {entry_id}"
+
+        print(delete_query)
+        # Execute the delete query
+        result = db.execute_query(delete_query)
+
+        # Check if rows were affected
+        if result.rowcount > 0:
+            return jsonify({'message': f'{result.rowcount} entry deleted successfully.'}), 200
+        else:
+            return jsonify({'message': 'No matching rows found to delete.'}), 404
+
+    except Exception as e:
+        print(str(e))
+        return jsonify({'error': str(e)}), 500
+    
 
 @api_db.route('/create_user', methods=['POST'])
 def create_user():
@@ -115,5 +146,46 @@ def update_booking():
             return jsonify({"message": "Booking updated successfully"}), 200
         else:
             return jsonify({"message": "Failed to update booking"}), 500
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+    
+@api_db.route('/add_package', methods=['POST'])
+def add_package():
+    data = request.json
+    try:
+        # Insert the new package into the database
+        query = """
+        INSERT INTO Packages (package_id, name, description, location_id, duration, price)
+        VALUES (:package_id, :name, :description, :location_id, :duration, :price)
+        """
+        db.execute_query(query, data)
+        return jsonify({"message": "Package added successfully"}), 201
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
+@api_db.route('/update_package', methods=['POST'])
+def update_package():
+    data = request.json
+    try:
+        # Update the package details
+        query = """
+        UPDATE Packages
+        SET name = :name, description = :description, location_id = :location_id, 
+            duration = :duration, price = :price
+        WHERE package_id = :package_id
+        """
+        db.execute_query(query, data)
+        return jsonify({"message": "Package updated successfully"}), 200
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
+@api_db.route('/delete_package', methods=['POST'])
+def delete_package():
+    data = request.json
+    try:
+        # Delete the package from the database
+        query = "DELETE FROM Packages WHERE package_id = :package_id"
+        db.execute_query(query, data)
+        return jsonify({"message": "Package deleted successfully"}), 200
     except Exception as e:
         return jsonify({"error": str(e)}), 500

@@ -117,6 +117,117 @@ export async function getPackages() {
   return packages;
 }
 
+export async function getUserOrders(email) {
+  const query = `
+    SELECT 
+      o.order_id, o.email, o.total_price, o.order_date, o.payment_status, 
+      b.start_date, b.end_date, b.number_of_travellers, b.price, b.status, 
+      p.package_id, p.name, p.duration, 
+      l.country, l.city
+    FROM Orders o 
+    JOIN OrderItems oi ON o.order_id = oi.order_id
+    JOIN Bookings b ON oi.booking_id = b.booking_id
+    JOIN Packages p ON b.package_id = p.package_id
+    JOIN Locations l ON p.location_id = l.location_id
+    WHERE o.email = '${email}'
+    ORDER BY o.order_date DESC,
+        CASE 
+            WHEN b.status = 'pending'   THEN 1
+            WHEN b.status = 'confirmed' THEN 2
+            WHEN b.status = 'cancelled' THEN 3
+        END;
+  `;
+
+  const data = await fetchDatabaseData(query);
+  
+  if (!data || data.length === 0) {
+    return [];
+  }
+
+  const imagesData = (await getData("PackageImages")) || [];
+
+  // Group orders by `order_id`
+  const ordersMap = {};
+
+  data.forEach(row => {
+    const orderId = row.order_id;
+
+    if (!ordersMap[orderId]) {
+      ordersMap[orderId] = {
+        date: row.order_date,
+        paymentStatus: row.payment_status,
+        totalPrice: row.total_price,
+        items: []
+      };
+    }
+
+    const relatedImages = imagesData.filter((img) => img.package_id === row.package_id);
+    const firstImage = relatedImages.length > 0 ? `/backend/images/${relatedImages[0].image_path}` : null;
+
+    // Add each item to the corresponding order
+    ordersMap[orderId].items.push({
+      id: row.package_id,
+      packageName: row.name,
+      location: `${row.city}, ${row.country}`,
+      duration: row.duration,
+      description: row.description,
+      startDate: row.start_date,
+      endDate: row.end_date,
+      price: row.price,
+      status: row.status,
+      travellers: row.number_of_travellers,
+      image: firstImage
+    });
+  });
+
+  return Object.values(ordersMap);
+}
+
+export async function getCartItems(email) {
+  const query = `
+    SELECT b.booking_id, b.package_id, b.start_date, b.end_date, b.number_of_travellers,
+           p.name, p.duration, p.price,
+           l.country, l.city
+    FROM Bookings b
+    JOIN Packages p ON b.package_id = p.package_id
+    JOIN Locations l ON p.location_id = l.location_id
+    WHERE b.email = '${email}' AND b.status = 'in-cart'
+    ORDER BY b.start_date ASC
+  `;
+
+  // Fetch the main cart data
+  const data = await fetchDatabaseData(query);
+  if (!data || data.length === 0) {
+    return [];
+  }
+
+  // Fetch the related images for packages
+  const imagesData = (await getData("PackageImages")) || [];
+
+  // Prepare cart items
+  const cartItems = data.map(row => {
+    // Find related images for the package
+    const relatedImages = imagesData.filter(img => img.package_id === row.package_id);
+    const firstImage = relatedImages.length > 0 ? `/backend/images/${relatedImages[0].image_path}` : null;
+
+    // Return the formatted item
+    return {
+      bookingId: row.booking_id,               // The ID of the booking
+      packageId: row.package_id,               // The ID of the package
+      packageName: row.name,                   // The name of the package
+      location: `${row.city}, ${row.country}`, // Combining the city and country
+      duration: row.duration,                  // Duration of the package
+      startDate: row.start_date,               // The start date of the booking
+      endDate: row.end_date,                   // The end date of the booking
+      price: row.price,                        // Price of the package
+      travellers: row.number_of_travellers,    // Number of travellers for this booking
+      image: firstImage                        // The image associated with the package
+    };
+  });
+
+  return cartItems;
+}
+
 export async function getPackagesGeneral(whereClause = "") {
   // Build the base query with a dynamic WHERE clause
   const query = `
