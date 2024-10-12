@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Box, IconButton, Typography, Button, Modal, TextField, MenuItem, FormControl } from '@mui/material';
 import CloseRoundedIcon from '@mui/icons-material/CloseRounded';
-import { getPackagesGeneral } from '../HelperFunctions/GetDatabaseModels'; // Function to fetch packages
+import { getPackagesGeneral, getLocations } from '../HelperFunctions/GetDatabaseModels'; // Fetch packages and locations
 import { updatePackage, addPackage, deletePackage } from '../HelperFunctions/SendData'; // Functions for managing packages
 
 const modalStyle = {
@@ -18,20 +18,25 @@ const modalStyle = {
 
 function ManagePackagesModal({ open, onClose }) {
   const [packages, setPackages] = useState([]);
+  const [locations, setLocations] = useState([]);
   const [selectedPackage, setSelectedPackage] = useState('');
+  const [editMode, setEditMode] = useState(false);
   const [newPackageId, setNewPackageId] = useState(null);
   const [packageDetails, setPackageDetails] = useState({
     name: '',
     description: '',
+    location_id: '',
     duration: '',
     price: '',
   });
 
-  // Fetch the list of packages when the modal opens
+  // Fetch the list of packages and locations when the modal opens
   useEffect(() => {
-    async function fetchPackages() {
+    async function fetchPackagesAndLocations() {
       const packageData = await getPackagesGeneral();
+      const locationData = await getLocations(); // Fetch locations
       setPackages(packageData);
+      setLocations(locationData);
 
       // Calculate the next auto-increment package_id
       if (packageData.length > 0) {
@@ -41,7 +46,7 @@ function ManagePackagesModal({ open, onClose }) {
     }
 
     if (open) {
-      fetchPackages();
+      fetchPackagesAndLocations();
     }
   }, [open]);
 
@@ -52,9 +57,11 @@ function ManagePackagesModal({ open, onClose }) {
     setPackageDetails({
       name: selected.name,
       description: selected.description,
+      location_id: selected.location_id,
       duration: selected.duration,
       price: selected.price,
     });
+    setEditMode(false); // Disable editing by default
   };
 
   // Handle form input changes
@@ -63,6 +70,18 @@ function ManagePackagesModal({ open, onClose }) {
     setPackageDetails((prevDetails) => ({
       ...prevDetails, [name]: value,
     }));
+  };
+
+  // Handle location selection from the dropdown
+  const handleLocationSelect = (locationId) => {
+    setPackageDetails((prevDetails) => ({
+      ...prevDetails, location_id: locationId,
+    }));
+  };
+
+  // Enable editing mode
+  const handleEditClick = () => {
+    setEditMode(true);
   };
 
   // Handle updating the selected package
@@ -131,7 +150,7 @@ function ManagePackagesModal({ open, onClose }) {
                 '& fieldset': { borderColor: 'white' },
               },
               '.MuiSvgIcon-root': { fill: 'white' },
-              mt: 1, // Ensure spacing between input and label
+              mt: 1,
               input: { color: 'white' },
               label: { color: 'white' },
             }}
@@ -144,7 +163,13 @@ function ManagePackagesModal({ open, onClose }) {
           </TextField>
         </FormControl>
 
-        {selectedPackage && (
+        {selectedPackage && !editMode && (
+          <Button variant="contained" color="primary" fullWidth onClick={handleEditClick}>
+            Edit Package
+          </Button>
+        )}
+
+        {selectedPackage && editMode && (
           <>
             <TextField
               label="Name"
@@ -153,6 +178,7 @@ function ManagePackagesModal({ open, onClose }) {
               onChange={handleInputChange}
               fullWidth
               sx={{ mb: 2 }}
+              disabled={!editMode}
             />
             <TextField
               label="Description"
@@ -161,7 +187,24 @@ function ManagePackagesModal({ open, onClose }) {
               onChange={handleInputChange}
               fullWidth
               sx={{ mb: 2 }}
+              disabled={!editMode}
             />
+            <TextField
+              select
+              label="Location"
+              name="location_id"
+              value={packageDetails.location_id}
+              onChange={(e) => handleLocationSelect(e.target.value)}
+              fullWidth
+              sx={{ mb: 2 }}
+              disabled={!editMode}
+            >
+              {locations.map((loc) => (
+                <MenuItem key={loc.location_id} value={loc.location_id}>
+                  {loc.city}, {loc.country}
+                </MenuItem>
+              ))}
+            </TextField>
             <TextField
               label="Duration"
               name="duration"
@@ -169,6 +212,7 @@ function ManagePackagesModal({ open, onClose }) {
               onChange={handleInputChange}
               fullWidth
               sx={{ mb: 2 }}
+              disabled={!editMode}
             />
             <TextField
               label="Price"
@@ -177,6 +221,7 @@ function ManagePackagesModal({ open, onClose }) {
               onChange={handleInputChange}
               fullWidth
               sx={{ mb: 2 }}
+              disabled={!editMode}
             />
             <Button variant="contained" color="primary" fullWidth onClick={handleUpdatePackage}>
               Update Package
@@ -205,6 +250,21 @@ function ManagePackagesModal({ open, onClose }) {
               fullWidth
               sx={{ mb: 2 }}
             />
+            <TextField
+              select
+              label="Location"
+              name="location_id"
+              value={packageDetails.location_id}
+              onChange={(e) => handleLocationSelect(e.target.value)}
+              fullWidth
+              sx={{ mb: 2 }}
+            >
+              {locations.map((loc) => (
+                <MenuItem key={loc.location_id} value={loc.location_id}>
+                  {loc.city}, {loc.country}
+                </MenuItem>
+              ))}
+            </TextField>
             <TextField
               label="Duration"
               name="duration"
