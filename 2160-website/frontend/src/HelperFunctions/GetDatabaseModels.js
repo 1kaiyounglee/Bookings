@@ -341,3 +341,33 @@ export async function getLocations() {
     country: location.country
   }));
 }
+
+
+
+// Function to fetch all categories (themes)
+export async function getCategories() {
+  const query = `SELECT DISTINCT name FROM Categories`;
+  const data = await fetchDatabaseData(query);
+
+  if (!data) {
+    throw new Error("Failed to fetch category data");
+  }
+
+  return data.map(category => category.name);
+}
+
+// Function to fetch distinct locations (city and country)
+export async function getDistinctLocations() {
+  const query = `SELECT DISTINCT city, country FROM Locations`;
+  const data = await fetchDatabaseData(query);
+
+  if (!data) {
+    throw new Error("Failed to fetch distinct location data");
+  }
+
+  return data.map(location => ({
+    city: location.city,
+    country: location.country
+  }));
+}
+
