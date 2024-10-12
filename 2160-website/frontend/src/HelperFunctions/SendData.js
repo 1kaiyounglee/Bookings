@@ -89,12 +89,13 @@ export async function updateBooking(bookingId, status) {
   if (!bookings || bookings.length === 0) {
     throw new Error('Booking not found');
   }
-  
+  console.log("asdkljBOOKINGS:", bookings);
   const booking = bookings[0]; 
   const bookingData = {
     ...booking,
     status: status
   };
+  console.log("bookingData:", bookingData);
 
   const response = await fetch('http://localhost:5000/api/database/update_booking', {
     method: 'POST',
