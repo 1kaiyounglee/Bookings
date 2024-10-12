@@ -30,7 +30,7 @@ function ManageBookingsModal({ open, onClose }) {
   const [bookings, setBookings] = useState([]);
   const [filteredPackages, setFilteredPackages] = useState([]);
   const [filteredDates, setFilteredDates] = useState([]);
-  const [selectedBooking, setSelectedBooking] = useState(null);
+  const [selectedBooking, setSelectedBooking] = useState(null); // Track the selected booking object
   const [successMessage, setSuccessMessage] = useState('');
 
   // Fetch all bookings and update state
@@ -55,10 +55,7 @@ function ManageBookingsModal({ open, onClose }) {
   // Update filtered packages when email changes
   const handleEmailChange = (email, setFieldValue) => {
     const userBookings = bookings.filter((booking) => booking.email === email);
-    const uniquePackages = [...new Set(userBookings.map((booking) => ({
-      package_name: booking.package_name,
-      booking_id: booking.booking_id,  // Track booking_id for this package
-    })))];
+    const uniquePackages = [...new Map(userBookings.map((booking) => [booking.package_name, booking])).values()];
     setFilteredPackages(uniquePackages);
     setFieldValue('package_name', '');
     setFieldValue('date', '');
@@ -67,12 +64,9 @@ function ManageBookingsModal({ open, onClose }) {
   };
 
   // Update filtered dates when package changes
-  const handlePackageChange = (packageName, setFieldValue) => {
-    const packageBookings = bookings.filter((booking) => booking.package_name === packageName);
-    const uniqueDates = [...new Set(packageBookings.map((booking) => ({
-      date: `${booking.start_date} - ${booking.end_date}`,
-      booking_id: booking.booking_id,  // Track booking_id for this date
-    })))];
+  const handlePackageChange = (packageName, email, setFieldValue) => {
+    const packageBookings = bookings.filter((booking) => booking.package_name === packageName && booking.email === email);
+    const uniqueDates = [...new Map(packageBookings.map((booking) => [booking.start_date, booking])).values()];
     setFilteredDates(uniqueDates);
     setFieldValue('date', '');
     setFieldValue('status', '');
@@ -80,11 +74,15 @@ function ManageBookingsModal({ open, onClose }) {
   };
 
   // Update status and booking when date changes
-  const handleDateChange = (date, setFieldValue) => {
-    const selectedDate = filteredDates.find(d => d.date === date);
-    const booking = bookings.find((booking) => booking.booking_id === selectedDate.booking_id);
-    setSelectedBooking(booking);
-    setFieldValue('status', booking?.status || '');
+  const handleDateChange = (date, email, packageName, setFieldValue) => {
+    const selectedDate = bookings.find(
+      (booking) =>
+        `${booking.start_date} - ${booking.end_date}` === date &&
+        booking.email === email &&
+        booking.package_name === packageName
+    );
+    setSelectedBooking(selectedDate); // Track the actual booking object
+    setFieldValue('status', selectedDate?.status || '');
   };
 
   return (
@@ -128,7 +126,7 @@ function ManageBookingsModal({ open, onClose }) {
             setSubmitting(true);
             setSuccessMessage(''); // Clear any previous success messages
             try {
-              // Update the booking and get the updated booking data
+              // Update the booking using the correct booking ID
               const updatedBooking = await updateBooking(selectedBooking.booking_id, values.status);
 
               // Refetch bookings after update to reload dropdown values
@@ -189,7 +187,7 @@ function ManageBookingsModal({ open, onClose }) {
                   value={values.package_name}
                   onChange={(e) => {
                     handleChange(e);
-                    handlePackageChange(e.target.value, setFieldValue);
+                    handlePackageChange(e.target.value, values.email, setFieldValue); // Pass email to ensure filtering by email
                   }}
                   variant="outlined"
                   sx={{
@@ -221,7 +219,7 @@ function ManageBookingsModal({ open, onClose }) {
                   value={values.date}
                   onChange={(e) => {
                     handleChange(e);
-                    handleDateChange(e.target.value, setFieldValue);
+                    handleDateChange(e.target.value, values.email, values.package_name, setFieldValue); // Pass email and package to ensure filtering by email and package
                   }}
                   variant="outlined"
                   sx={{
@@ -237,8 +235,8 @@ function ManageBookingsModal({ open, onClose }) {
                   disabled={!values.package_name}
                 >
                   {filteredDates.map((dateObj, index) => (
-                    <MenuItem key={index} value={dateObj.date}>
-                      {dateObj.date}
+                    <MenuItem key={index} value={`${dateObj.start_date} - ${dateObj.end_date}`}>
+                      {`${dateObj.start_date} - ${dateObj.end_date}`}
                     </MenuItem>
                   ))}
                 </TextField>
