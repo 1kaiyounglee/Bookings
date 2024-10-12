@@ -36,7 +36,6 @@ function ManageBookingsModal({ open, onClose }) {
   // Fetch all bookings and update state
   async function fetchBookings() {
     const bookingsData = await getBookings();
-    console.log("BOOKINGS DATA", bookingsData);
     setBookings(bookingsData);
   }
 
@@ -47,13 +46,19 @@ function ManageBookingsModal({ open, onClose }) {
     }
   }, [open]);
 
+  // Helper function to remove duplicates based on a key
+  const removeDuplicates = (arr, key) => {
+    return [...new Map(arr.map(item => [item[key], item])).values()];
+  };
+
   // Update filtered packages when email changes
   const handleEmailChange = (email, setFieldValue) => {
     const userBookings = bookings.filter((booking) => booking.email === email);
-    setFilteredPackages([...new Set(userBookings.map((booking) => ({
-      package_id: booking.package_id,
-      package_name: booking.package_name,
-    })))]);
+    
+    // Ensure packages are unique
+    const uniquePackages = removeDuplicates(userBookings, 'package_id');
+    
+    setFilteredPackages(uniquePackages);
     setFieldValue('package_name', '');
     setFieldValue('date', '');
     setFieldValue('status', '');
@@ -62,7 +67,11 @@ function ManageBookingsModal({ open, onClose }) {
   // Update filtered dates when package changes
   const handlePackageChange = (packageName, setFieldValue) => {
     const packageBookings = bookings.filter((booking) => booking.package_name === packageName);
-    setFilteredDates(packageBookings.map((booking) => `${booking.start_date} - ${booking.end_date}`));
+    
+    // Ensure dates are unique
+    const uniqueDates = [...new Set(packageBookings.map((booking) => `${booking.start_date} - ${booking.end_date}`))];
+    
+    setFilteredDates(uniqueDates);
     setFieldValue('date', '');
     setFieldValue('status', '');
   };
@@ -160,9 +169,9 @@ function ManageBookingsModal({ open, onClose }) {
                     label: { color: 'white' },
                   }}
                 >
-                  {bookings.map((booking, index) => (
-                    <MenuItem key={index} value={booking.email}>
-                      {booking.email}
+                  {[...new Set(bookings.map((booking) => booking.email))].map((email, index) => (
+                    <MenuItem key={index} value={email}>
+                      {email}
                     </MenuItem>
                   ))}
                 </TextField>
