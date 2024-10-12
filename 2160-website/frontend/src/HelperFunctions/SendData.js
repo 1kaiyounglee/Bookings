@@ -249,3 +249,32 @@ export async function changePassword({ email, currentPassword, newPassword }) {
     return { error: error.message || 'Unknown error occurred' };
   }
 }
+
+export async function insertBooking(email, bookingData) {
+  try {
+    const response = await fetch('http://localhost:5000/api/database/update_booking', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        email: email,
+        package_id: bookingData.packageId,
+        start_date: bookingData.startDate,
+        end_date: bookingData.endDate,
+        number_of_travellers: bookingData.numTravellers,
+        price: bookingData.price,
+        status: 'in-cart',
+      }),
+    });
+
+    if (!response.ok) {
+      throw new Error('Failed to insert booking');
+    }
+
+    return await response.json();
+  } catch (error) {
+    console.error('Error inserting booking:', error);
+    throw error;
+  }
+}
