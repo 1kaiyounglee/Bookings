@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
-import { Box, Typography, TextField, MenuItem, Slider, Grid } from '@mui/material';
-import { Formik, Field } from 'formik';
-import { useNavigate } from 'react-router-dom'; // Import useNavigate
+import { Box, Typography, MenuItem, Slider, Grid, Select, InputLabel, FormControl, Checkbox, ListItemText, OutlinedInput } from '@mui/material';
+import { Formik } from 'formik';
+import { useNavigate } from 'react-router-dom';
 import { getPackagesGeneral, getDistinctLocations, getCategories } from '../HelperFunctions/GetDatabaseModels';
 
 function BrowsePackages() {
@@ -10,7 +10,13 @@ function BrowsePackages() {
   const [locations, setLocations] = useState([]);
   const [themes, setThemes] = useState([]);
   const [loading, setLoading] = useState(true);
-  const navigate = useNavigate(); // Initialize useNavigate
+
+  const [minDuration, setMinDuration] = useState(0);
+  const [maxDuration, setMaxDuration] = useState(10);
+  const [minPrice, setMinPrice] = useState(0);
+  const [maxPrice, setMaxPrice] = useState(2000);
+
+  const navigate = useNavigate();
 
   // Fetch the packages, themes, and locations when the component loads
   useEffect(() => {
@@ -21,6 +27,15 @@ function BrowsePackages() {
         setFilteredPackages(packageData); // Initially, filtered packages will be the same as all packages
         setLocations(locationData);
         setThemes(categoryData);
+
+        // Calculate the min/max duration and price from the package data
+        const durations = packageData.map(pkg => pkg.duration);
+        const prices = packageData.map(pkg => pkg.price);
+        
+        setMinDuration(Math.min(...durations));
+        setMaxDuration(Math.max(...durations));
+        setMinPrice(Math.min(...prices));
+        setMaxPrice(Math.max(...prices));
       } catch (error) {
         console.error('Error fetching data:', error);
       } finally {
@@ -36,13 +51,17 @@ function BrowsePackages() {
     let filteredData = [...allPackages]; // Start with all the packages
 
     // Apply theme filter
-    if (values.theme) {
-      filteredData = filteredData.filter(pkg => pkg.categories.includes(values.theme));
+    if (values.theme.length > 0) {
+      filteredData = filteredData.filter(pkg => 
+        values.theme.some(theme => pkg.categories.includes(theme))
+      );
     }
 
     // Apply location filter
-    if (values.location) {
-      filteredData = filteredData.filter(pkg => pkg.location_city === values.location);
+    if (values.location.length > 0) {
+      filteredData = filteredData.filter(pkg => 
+        values.location.includes(pkg.location_city)
+      );
     }
 
     // Apply duration filter
@@ -64,58 +83,66 @@ function BrowsePackages() {
       {/* Filter Section */}
       <Formik
         initialValues={{
-          theme: '',
-          location: '',
-          duration: [0, 10],
-          price: [0, 2000],
+          theme: [],
+          location: [],
+          duration: [minDuration, maxDuration], // Initialize dynamically based on package data
+          price: [minPrice, maxPrice], // Initialize dynamically based on package data
         }}
-        onSubmit={() => {}} // We no longer need the submit button, filters will update dynamically
+        onSubmit={() => {}} // Filters will update dynamically
       >
         {({ values, handleChange, setFieldValue }) => (
           <Box sx={{ width: '300px', paddingRight: '20px', position: 'sticky', top: '20px', flexShrink: 0, borderRight: '1px solid #ccc' }}>
             <Typography variant="h5" sx={{ marginBottom: '20px' }}>
               Filter Packages
             </Typography>
-            <Field
-              as={TextField}
-              label="Theme"
-              name="theme"
-              select
-              fullWidth
-              value={values.theme}
-              onChange={(e) => {
-                handleChange(e);
-                applyFilters({ ...values, theme: e.target.value });
-              }}
-              sx={{ marginBottom: '20px' }}
-            >
-              <MenuItem value="">All</MenuItem>
-              {themes.map((theme, index) => (
-                <MenuItem key={index} value={theme}>
-                  {theme}
-                </MenuItem>
-              ))}
-            </Field>
-            <Field
-              as={TextField}
-              label="Location"
-              name="location"
-              select
-              fullWidth
-              value={values.location}
-              onChange={(e) => {
-                handleChange(e);
-                applyFilters({ ...values, location: e.target.value });
-              }}
-              sx={{ marginBottom: '20px' }}
-            >
-              <MenuItem value="">All</MenuItem>
-              {locations.map((location, index) => (
-                <MenuItem key={index} value={location.city}>
-                  {location.city}, {location.country}
-                </MenuItem>
-              ))}
-            </Field>
+
+            {/* Multi-select for Themes */}
+            <FormControl fullWidth sx={{ marginBottom: '20px' }}>
+              <InputLabel>Theme</InputLabel>
+              <Select
+                multiple
+                name="theme"
+                value={values.theme || []}  // Ensure it's an array
+                onChange={(e) => {
+                  const selectedThemes = e.target.value || [];
+                  setFieldValue("theme", selectedThemes);
+                  applyFilters({ ...values, theme: selectedThemes });
+                }}
+                input={<OutlinedInput label="Theme" />}
+                renderValue={(selected) => selected.join(', ')} // Display selected themes
+              >
+                {themes.map((theme, index) => (
+                  <MenuItem key={index} value={theme}>
+                    <Checkbox checked={values.theme.indexOf(theme) > -1} />
+                    <ListItemText primary={theme} />
+                  </MenuItem>
+                ))}
+              </Select>
+            </FormControl>
+
+            {/* Multi-select for Locations */}
+            <FormControl fullWidth sx={{ marginBottom: '20px' }}>
+              <InputLabel>Location</InputLabel>
+              <Select
+                multiple
+                name="location"
+                value={values.location || []}  // Ensure it's an array
+                onChange={(e) => {
+                  const selectedLocations = e.target.value || [];
+                  setFieldValue("location", selectedLocations);
+                  applyFilters({ ...values, location: selectedLocations });
+                }}
+                input={<OutlinedInput label="Location" />}
+                renderValue={(selected) => selected.join(', ')} // Display selected locations
+              >
+                {locations.map((location, index) => (
+                  <MenuItem key={index} value={location.city}>
+                    <Checkbox checked={values.location.indexOf(location.city) > -1} />
+                    <ListItemText primary={`${location.city}, ${location.country}`} />
+                  </MenuItem>
+                ))}
+              </Select>
+            </FormControl>
 
             <Typography gutterBottom>Duration (days)</Typography>
             <Slider
@@ -125,8 +152,8 @@ function BrowsePackages() {
                 applyFilters({ ...values, duration: newValue });
               }}
               valueLabelDisplay="auto"
-              min={0}
-              max={10}
+              min={minDuration}
+              max={maxDuration}
               sx={{ marginBottom: '20px' }}
             />
             <Typography gutterBottom>Price ($)</Typography>
@@ -137,8 +164,8 @@ function BrowsePackages() {
                 applyFilters({ ...values, price: newValue });
               }}
               valueLabelDisplay="auto"
-              min={0}
-              max={2000}
+              min={minPrice}
+              max={maxPrice}
               sx={{ marginBottom: '20px' }}
             />
           </Box>
