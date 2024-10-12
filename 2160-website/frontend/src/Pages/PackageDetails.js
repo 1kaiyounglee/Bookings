@@ -7,6 +7,7 @@ import ArrowForwardIos from '@mui/icons-material/ArrowForwardIos';
 import { DatePicker } from '@mui/x-date-pickers/DatePicker';
 import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
 import { AdapterDateFns } from '@mui/x-date-pickers/AdapterDateFns';
+import { enGB } from 'date-fns/locale';
 import addDays from 'date-fns/addDays';
 
 function PackageDetails() {
@@ -61,6 +62,10 @@ function PackageDetails() {
   const handlePrevImage = () => {
     setCurrentImageIndex((prev) => (prev - 1 + packageData.images.length) % packageData.images.length);
   };
+
+  const handleAddToCart = () => {
+
+  }
 
   if (!packageData) {
     return <div>Loading...</div>;
@@ -123,7 +128,7 @@ function PackageDetails() {
               <Typography>Duration: {packageData.duration} days</Typography>
 
               {/* Booking Form */}
-              <LocalizationProvider dateAdapter={AdapterDateFns}>
+              <LocalizationProvider dateAdapter={AdapterDateFns} adapterLocale={enGB}>
                 <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2, mt: 3 }}>
                   <TextField
                     label="Number of Travellers"
@@ -151,7 +156,7 @@ function PackageDetails() {
                     disablePast
                   />
 
-                  <Button variant="contained" color="primary">
+                  <Button variant="contained" color="primary" onClick={handleAddToCart}>
                     Add to Cart
                   </Button>
                 </Box>
