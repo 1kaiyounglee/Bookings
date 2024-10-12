@@ -1,17 +1,3 @@
-<<<<<<< HEAD
-import React from 'react';
-
-function BookingsPage() {
-  return (
-    <div>
-      <h1>My Bookings</h1>
-      {/* Add the content you want here */}
-    </div>
-  );
-}
-
-export default BookingsPage;
-=======
 import React, { useState, useEffect } from 'react';
 import { Box, Typography } from '@mui/material';
 import ArrowBackIos from '@mui/icons-material/ArrowBackIos';
@@ -131,4 +117,3 @@ const OrderItem = ({ item, handlePackageClick }) => (
 );
 
 export default MyBookings;
->>>>>>> main
