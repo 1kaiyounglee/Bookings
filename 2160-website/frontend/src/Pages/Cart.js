@@ -7,6 +7,7 @@ import { AdapterDateFns } from '@mui/x-date-pickers/AdapterDateFns';
 import { getCartItems } from '../HelperFunctions/GetDatabaseModels';
 import { updateCartItem, removeCartItem } from '../HelperFunctions/SendData'
 import EditPackageModal from '../Components/EditCartModal';
+import { enGB } from 'date-fns/locale';
 
 function Cart({ user }) {
   const navigate = useNavigate();
@@ -85,7 +86,7 @@ function Cart({ user }) {
   }
 
   return (
-    <LocalizationProvider dateAdapter={AdapterDateFns}>  {/* Wrap your component here */}
+    <LocalizationProvider dateAdapter={AdapterDateFns} adapterLocale={enGB}>  {/* Wrap your component here */}
       <Box sx={{ padding: '20px' }}>
         {/* Back Arrow */}
         <ArrowBackIos onClick={() => window.history.back()} style={{ cursor: 'pointer' }} />

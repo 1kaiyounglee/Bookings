@@ -19,7 +19,7 @@ const modalStyle = {
 function ManagePackagesModal({ open, onClose }) {
   const [packages, setPackages] = useState([]);
   const [locations, setLocations] = useState([]);
-  const [selectedPackage, setSelectedPackage] = useState('');
+  const [selectedPackage, setSelectedPackage] = useState('new');
   const [newPackageId, setNewPackageId] = useState(null);
   const [packageDetails, setPackageDetails] = useState({
     name: '',
@@ -42,7 +42,7 @@ function ManagePackagesModal({ open, onClose }) {
   async function fetchPackagesAndLocations() {
     const packageData = await getPackagesGeneral();
     const locationData = await getLocations(); // Fetch locations
-    setPackages(packageData);
+    setPackages([{ package_id: 'new', name: 'New Package' }, ...packageData]); // Add 'new package' as the first item
     setLocations(locationData);
 
     // Calculate the next auto-increment package_id
@@ -54,15 +54,25 @@ function ManagePackagesModal({ open, onClose }) {
 
   // Handle package selection and populate fields
   const handlePackageSelect = (packageId) => {
-    const selected = packages.find(p => p.package_id === packageId);
+    if (packageId === 'new') {
+      setPackageDetails({
+        name: '',
+        description: '',
+        location_id: '',
+        duration: '',
+        price: '',
+      });
+    } else {
+      const selected = packages.find(p => p.package_id === packageId);
+      setPackageDetails({
+        name: selected.name,
+        description: selected.description,
+        location_id: selected.location_id,
+        duration: selected.duration,
+        price: selected.price,
+      });
+    }
     setSelectedPackage(packageId);
-    setPackageDetails({
-      name: selected.name,
-      description: selected.description,
-      location_id: selected.location_id,
-      duration: selected.duration,
-      price: selected.price,
-    });
   };
 
   // Handle form input changes
@@ -86,25 +96,19 @@ function ManagePackagesModal({ open, onClose }) {
     setSnackbarOpen(true);
   };
 
-  // Handle updating the selected package
-  const handleUpdatePackage = async () => {
+  // Handle updating or adding a package
+  const handleUpsertPackage = async () => {
     try {
-      await upsertPackage({ package_id: selectedPackage, ...packageDetails });
-      showSnackbar('Package updated successfully!');
+      if (selectedPackage === 'new') {
+        await upsertPackage({ ...packageDetails, package_id: newPackageId });
+        showSnackbar('Package added successfully!');
+      } else {
+        await upsertPackage({ package_id: selectedPackage, ...packageDetails });
+        showSnackbar('Package updated successfully!');
+      }
       await fetchPackagesAndLocations(); // Refresh the list of packages
     } catch (error) {
-      console.error('Error updating package:', error);
-    }
-  };
-
-  // Handle adding a new package
-  const handleAddPackage = async () => {
-    try {
-      await upsertPackage({ ...packageDetails, package_id: newPackageId });
-      showSnackbar('Package added successfully!');
-      await fetchPackagesAndLocations(); // Refresh the list of packages
-    } catch (error) {
-      console.error('Error adding package:', error);
+      console.error('Error upserting package:', error);
     }
   };
 
@@ -114,7 +118,7 @@ function ManagePackagesModal({ open, onClose }) {
       await deletePackage(selectedPackage);
       showSnackbar('Package deleted successfully!');
       await fetchPackagesAndLocations(); // Refresh the list of packages
-      setSelectedPackage(''); // Reset selected package after deletion
+      setSelectedPackage('new'); // Reset to 'new package' after deletion
       setPackageDetails({
         name: '',
         description: '',
@@ -129,7 +133,7 @@ function ManagePackagesModal({ open, onClose }) {
 
   // Clear data on modal close
   const handleModalClose = () => {
-    setSelectedPackage('');
+    setSelectedPackage('new');
     setPackageDetails({
       name: '',
       description: '',
@@ -176,6 +180,7 @@ function ManagePackagesModal({ open, onClose }) {
               value={selectedPackage}
               onChange={(e) => handlePackageSelect(e.target.value)}
               variant="outlined"
+              required
               sx={{
                 color: 'white',
                 '.MuiOutlinedInput-root': {
@@ -201,6 +206,7 @@ function ManagePackagesModal({ open, onClose }) {
             value={packageDetails.name}
             onChange={handleInputChange}
             fullWidth
+            required
             sx={{ mb: 2 }}
           />
           <TextField
@@ -209,6 +215,7 @@ function ManagePackagesModal({ open, onClose }) {
             value={packageDetails.description}
             onChange={handleInputChange}
             fullWidth
+            required
             sx={{ mb: 2 }}
           />
           <TextField
@@ -218,6 +225,7 @@ function ManagePackagesModal({ open, onClose }) {
             value={packageDetails.location_id}
             onChange={(e) => handleLocationSelect(e.target.value)}
             fullWidth
+            required
             sx={{ mb: 2 }}
           >
             {locations.map((loc) => (
@@ -232,6 +240,7 @@ function ManagePackagesModal({ open, onClose }) {
             value={packageDetails.duration}
             onChange={handleInputChange}
             fullWidth
+            required
             sx={{ mb: 2 }}
           />
           <TextField
@@ -240,18 +249,18 @@ function ManagePackagesModal({ open, onClose }) {
             value={packageDetails.price}
             onChange={handleInputChange}
             fullWidth
+            required
             sx={{ mb: 2 }}
           />
 
-          <Button variant="contained" color="primary" fullWidth onClick={handleUpdatePackage} sx={{ mt: 1 }}>
-            Update Package
+          <Button variant="contained" color="primary" fullWidth onClick={handleUpsertPackage} sx={{ mt: 1 }}>
+            {selectedPackage === 'new' ? 'Add Package' : 'Update Package'}
           </Button>
-          <Button variant="contained" color="primary" fullWidth onClick={handleAddPackage} sx={{ mt: 2 }}>
-            Add Package
-          </Button>
-          <Button variant="outlined" color="secondary" fullWidth sx={{ mt: 2 }} onClick={handleDeletePackage}>
-            Delete Package
-          </Button>
+          {selectedPackage !== 'new' && (
+            <Button variant="outlined" color="secondary" fullWidth sx={{ mt: 2 }} onClick={handleDeletePackage}>
+              Delete Package
+            </Button>
+          )}
         </Box>
       </Modal>
 
