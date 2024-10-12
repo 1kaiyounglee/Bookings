@@ -40,7 +40,7 @@ function Navbar({ onLoginRegisterClick, isLoggedIn, handleLogout, user }) {
   };
 
   return (
-    <AppBar position="static">
+    <AppBar position="fixed">
       <Toolbar sx={{ justifyContent: 'space-between' }}>
         {/* Home button now smaller and aligned to the left */}
         <Button color="inherit" onClick={handleHomeClick} sx={{ fontSize: '1rem', textTransform: 'none' }}>

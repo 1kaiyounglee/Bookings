@@ -1,19 +1,16 @@
 import React, { useState, useEffect } from 'react';
-import { Box, Typography, Slider, TextField, MenuItem, Button } from '@mui/material';
-import ArrowBackIos from '@mui/icons-material/ArrowBackIos';
-import { useNavigate } from 'react-router-dom';
+import { Box, Typography, TextField, MenuItem, Slider, Button, Grid } from '@mui/material';
 import { getPackagesGeneral } from '../HelperFunctions/GetDatabaseModels';
 
 function BrowsePackages() {
-  const navigate = useNavigate();
   const [packages, setPackages] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [filter, setFilter] = useState({
+  const [filters, setFilters] = useState({
     theme: '',
     location: '',
-    duration: [1, 10],
-    price: [100, 2000],
+    duration: [0, 10],
+    price: [0, 2000],
   });
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     async function fetchPackages() {
@@ -26,111 +23,142 @@ function BrowsePackages() {
         setLoading(false);
       }
     }
+
     fetchPackages();
   }, []);
 
-  const handlePackageClick = (package_id) => {
-    navigate(`/package/${package_id}`);
+  const handleFilterChange = (e) => {
+    setFilters({
+      ...filters,
+      [e.target.name]: e.target.value,
+    });
   };
 
-  const applyFilters = async () => {
-    let whereClause = '';
-    if (filter.theme) whereClause += `c.name = '${filter.theme}' AND `;
-    if (filter.location) whereClause += `l.city = '${filter.location}' AND `;
-    if (whereClause.endsWith('AND ')) whereClause = whereClause.slice(0, -4);
-    const filteredPackages = await getPackagesGeneral(whereClause);
-    setPackages(filteredPackages);
+  const handleDurationChange = (event, newValue) => {
+    setFilters((prev) => ({ ...prev, duration: newValue }));
   };
+
+  const handlePriceChange = (event, newValue) => {
+    setFilters((prev) => ({ ...prev, price: newValue }));
+  };
+
+  const applyFilters = () => {
+    console.log('Apply filters with: ', filters);
+    // You can build a whereClause from the filters and fetch filtered data if needed.
+  };
+
+  if (loading) {
+    return <Typography>Loading packages...</Typography>;
+  }
+
+  if (packages.length === 0) {
+    return <Typography>No packages found.</Typography>;
+  }
 
   return (
-    <Box sx={{ display: 'flex', gap: 2, padding: '20px' }}>
-      {/* Filter Sidebar */}
-      <Box sx={{ minWidth: '250px', border: '1px solid #ccc', padding: '20px', borderRadius: '8px' }}>
-        <Typography variant="h5" gutterBottom>
+    <Box sx={{ display: 'flex', padding: '20px' }}>
+      {/* Filter Section */}
+      <Box sx={{ width: '300px', paddingRight: '20px', position: 'sticky', top: '20px' }}>
+        <Typography variant="h5" sx={{ marginBottom: '20px' }}>
           Filter Packages
         </Typography>
         <TextField
-          select
           label="Theme"
-          value={filter.theme}
-          onChange={(e) => setFilter({ ...filter, theme: e.target.value })}
+          name="theme"
+          select
           fullWidth
-          sx={{ mb: 2 }}
+          value={filters.theme}
+          onChange={handleFilterChange}
+          sx={{ marginBottom: '20px' }}
         >
-          {/* Populate themes dynamically */}
+          <MenuItem value="">All</MenuItem>
           <MenuItem value="Adventure">Adventure</MenuItem>
           <MenuItem value="Cultural">Cultural</MenuItem>
-          {/* Add more themes here */}
         </TextField>
         <TextField
-          select
           label="Location"
-          value={filter.location}
-          onChange={(e) => setFilter({ ...filter, location: e.target.value })}
+          name="location"
+          select
           fullWidth
-          sx={{ mb: 2 }}
+          value={filters.location}
+          onChange={handleFilterChange}
+          sx={{ marginBottom: '20px' }}
         >
-          {/* Populate locations dynamically */}
+          <MenuItem value="">All</MenuItem>
           <MenuItem value="New York">New York</MenuItem>
-          <MenuItem value="Paris">Paris</MenuItem>
-          {/* Add more locations here */}
+          <MenuItem value="Tokyo">Tokyo</MenuItem>
         </TextField>
         <Typography gutterBottom>Duration (days)</Typography>
         <Slider
-          value={filter.duration}
-          onChange={(e, newValue) => setFilter({ ...filter, duration: newValue })}
+          value={filters.duration}
+          onChange={handleDurationChange}
           valueLabelDisplay="auto"
-          min={1}
+          min={0}
           max={10}
-          sx={{ mb: 2 }}
+          sx={{ marginBottom: '20px' }}
         />
         <Typography gutterBottom>Price ($)</Typography>
         <Slider
-          value={filter.price}
-          onChange={(e, newValue) => setFilter({ ...filter, price: newValue })}
+          value={filters.price}
+          onChange={handlePriceChange}
           valueLabelDisplay="auto"
-          min={100}
+          min={0}
           max={2000}
-          sx={{ mb: 2 }}
+          sx={{ marginBottom: '20px' }}
         />
-        <Button variant="contained" color="primary" onClick={applyFilters} fullWidth>
+        <Button variant="contained" fullWidth onClick={applyFilters}>
           Apply Filters
         </Button>
       </Box>
 
-      {/* Package Slider */}
-      <Box sx={{ flexGrow: 1, overflowX: 'scroll', display: 'flex', gap: 2 }}>
-        {loading ? (
-          <Typography>Loading...</Typography>
-        ) : packages.length > 0 ? (
-          packages.map((pkg, index) => (
-            <PackageItem key={index} pkg={pkg} handlePackageClick={handlePackageClick} />
-          ))
-        ) : (
-          <Typography>No packages found.</Typography>
-        )}
+      {/* Packages Section */}
+      <Box sx={{ flex: 1, paddingLeft: '20px' }}>
+        <Grid container spacing={3}>
+          {packages.map((pkg, index) => (
+            <Grid item xs={12} sm={6} key={index}>
+              <Box
+                sx={{
+                  border: '2px solid #ccc',
+                  borderRadius: '8px',
+                  padding: '20px',
+                  display: 'flex',
+                  alignItems: 'center',
+                  height: '150px',
+                }}
+              >
+                {/* Package Image */}
+                <Box sx={{ width: '150px', height: '100%', marginRight: '20px', overflow: 'hidden', borderRadius: '8px' }}>
+                  {pkg.images && pkg.images.length > 0 ? (
+                    <img
+                      src={`http://localhost:5000${pkg.images[0]}`}
+                      alt={pkg.name}
+                      style={{ width: '100%', height: '100%', objectFit: 'cover', borderRadius: '8px' }}
+                    />
+                  ) : (
+                    <Typography>No Image Available</Typography>
+                  )}
+                </Box>
+
+                {/* Package Details */}
+                <Box sx={{ flexGrow: 1 }}>
+                  <Typography variant="h6" sx={{ marginBottom: '5px' }}>
+                    {pkg.name}
+                  </Typography>
+                  <Typography variant="body1" sx={{ marginBottom: '5px' }}>
+                    {pkg.location_city}, {pkg.location_country}
+                  </Typography>
+                  <Typography variant="body1" sx={{ marginBottom: '5px' }}>
+                    {pkg.duration} days
+                  </Typography>
+                  <Typography variant="body1">Price: ${pkg.price}</Typography>
+                </Box>
+              </Box>
+            </Grid>
+          ))}
+        </Grid>
       </Box>
     </Box>
   );
 }
-
-// Package Item Component
-const PackageItem = ({ pkg, handlePackageClick }) => (
-  <Box sx={{ minWidth: '275px', border: '2px solid #ccc', borderRadius: '8px', padding: '15px', cursor: 'pointer' }} onClick={() => handlePackageClick(pkg.package_id)}>
-    <Box sx={{ mb: 2 }}>
-      {pkg.images && pkg.images.length > 0 ? (
-        <img src={pkg.images[0]} alt={pkg.name} style={{ width: '100%', borderRadius: '8px' }} />
-      ) : (
-        <Typography>No Image</Typography>
-      )}
-    </Box>
-    <Typography variant="h6" sx={{ mb: 1 }}>
-      {pkg.name}
-    </Typography>
-    <Typography>Location: {pkg.location_city}, {pkg.location_country}</Typography>
-    <Typography>Duration: {pkg.duration} days</Typography>
-    <Typography>Price: ${pkg.price}</Typography>
-  </Box>
-);
 
 export default BrowsePackages;

@@ -103,7 +103,7 @@ function App() {
             handleLogout={handleLogout}
             user={user}
           />
-
+          <Box sx={{ paddingTop: '64px' }}></Box>
           {/* Define the Routes */}
           <Routes>
             <Route path="/" element={<HomePage />} />
