@@ -11,7 +11,7 @@ import MyBookings from './Pages/MyBookings';
 import Cart from './Pages/Cart'
 import AdminPanel from './Pages/AdminPanel';  // Import AdminPanel page
 import { deepPurple } from '@mui/material/colors';
-
+import Account from './Pages/Account'
 const darkTheme = createTheme({
   palette: {
     mode: 'dark',
@@ -110,6 +110,8 @@ function App() {
             {user.isLoggedIn && <Route path="/bookings" element={<MyBookings user={user}/>} />}
             {user.isLoggedIn && <Route path="/cart" element={<Cart user = {user}/>}/>}
             {user.isAdmin && <Route path="/admin" element={<AdminPanel user={user}/>} />}  {/* Admin route */}
+            <Route path="/account" element={<Account user={user} />} />
+
           </Routes>
 
           <LoginModal

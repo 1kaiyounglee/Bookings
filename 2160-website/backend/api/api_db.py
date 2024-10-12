@@ -187,3 +187,35 @@ def delete_package():
         return jsonify({"message": "Package deleted successfully"}), 200
     except Exception as e:
         return jsonify({"error": str(e)}), 500
+    
+
+    
+@api_db.route('/change_password', methods=['POST'])
+def change_password():
+    try:
+        data = request.json
+        email = data.get('email')
+        current_password = data.get('current_password')
+        new_password = data.get('new_password')
+
+        # Fetch the user by email
+        query = f"SELECT * FROM Users WHERE email = '{email}'"
+        user = db.fetch_data(query)
+
+        if user.empty:
+            return jsonify({'error': 'User not found'}), 404
+
+        # Verify the current password
+        stored_password = user.iloc[0]['password']
+        if not bcrypt.checkpw(current_password.encode('utf-8'), stored_password.encode('utf-8')):
+            return jsonify({'error': 'Current password is incorrect'}), 400
+
+        # Hash the new password and update it
+        hashed_new_password = bcrypt.hashpw(new_password.encode('utf-8'), bcrypt.gensalt()).decode('utf-8')
+        update_query = f"UPDATE Users SET password = '{hashed_new_password}' WHERE email = '{email}'"
+        db.execute_query(update_query)
+
+        return jsonify({'message': 'Password changed successfully'}), 200
+
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
