@@ -6,12 +6,12 @@ import LoginModal from './Components/LoginModal';
 import RegisterModal from './Components/RegisterModal';
 import Navbar from './Components/Navbar';
 import HomePage from './Pages/HomePage';
+import Account from './Pages/Account'
 import PackageDetails from './Pages/PackageDetails';
 import MyBookings from './Pages/MyBookings';
 import Cart from './Pages/Cart'
 import AdminPanel from './Pages/AdminPanel';  // Import AdminPanel page
 import { deepPurple } from '@mui/material/colors';
-import Account from './Pages/Account'
 const darkTheme = createTheme({
   palette: {
     mode: 'dark',
