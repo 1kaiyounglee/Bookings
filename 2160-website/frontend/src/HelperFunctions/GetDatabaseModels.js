@@ -346,14 +346,17 @@ export async function getLocations() {
 
 // Function to fetch all categories (themes)
 export async function getCategories() {
-  const query = `SELECT DISTINCT name FROM Categories`;
+  const query = `SELECT category_id, name FROM Categories`;
   const data = await fetchDatabaseData(query);
 
   if (!data) {
     throw new Error("Failed to fetch category data");
   }
 
-  return data.map(category => category.name);
+  return data.map(category => ({
+    category_id: category.category_id,
+    name: category.name
+  }));
 }
 
 // Function to fetch distinct locations (city and country)
