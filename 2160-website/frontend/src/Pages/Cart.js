@@ -1,13 +1,13 @@
 import React, { useState, useEffect } from 'react';
-import { Box, Typography, Button } from '@mui/material';
+import { Box, Typography, Button, Snackbar, Alert } from '@mui/material';
 import ArrowBackIos from '@mui/icons-material/ArrowBackIos';
 import { useNavigate } from 'react-router-dom';
 import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
 import { AdapterDateFns } from '@mui/x-date-pickers/AdapterDateFns';
+import { enGB } from 'date-fns/locale';
 import { getCartItems } from '../HelperFunctions/GetDatabaseModels';
 import { updateCartItem, removeCartItem } from '../HelperFunctions/SendData'
 import EditPackageModal from '../Components/EditCartModal';
-import { enGB } from 'date-fns/locale';
 
 function Cart({ user }) {
   const navigate = useNavigate();
@@ -16,6 +16,8 @@ function Cart({ user }) {
   const [totalPrice, setTotalPrice] = useState(0);
   const [selectedItem, setSelectedItem] = useState(null); // Track the selected item for editing
   const [editModalOpen, setEditModalOpen] = useState(false);
+  const [snackbarMessage, setSnackbarMessage] = useState('');
+  const [snackbarOpen, setSnackbarOpen] = useState(false)
 
   const handlePackageClick = (packageId) => {
     navigate(`/package/${packageId}`);
@@ -25,14 +27,24 @@ function Cart({ user }) {
     // Update the cart item with the new details
     await updateCartItem(item, newStartDate, newEndDate, newTravellers);
     setEditModalOpen(false);
-    // Refresh cart items after update
+    showSnackbar('Package updated.')
     fetchCartItems();
+  };
+
+  const showSnackbar = (message) => {
+    setSnackbarMessage(message);
+    setSnackbarOpen(true);
+  };
+
+  const handleSnackbarClose = () => {
+    setSnackbarOpen(false);
   };
 
   const handleRemoveItem = async (item) => {
     // Remove the cart item
     await removeCartItem(item);
     setEditModalOpen(false);
+    showSnackbar('Package removed from cart.')
     // Refresh cart items after removal
     fetchCartItems();
   };
@@ -45,15 +57,7 @@ function Cart({ user }) {
   const openEditModal = (item) => {
     setSelectedItem(item); // Set the item to be edited
     setEditModalOpen(true); // Open the modal
-  };{selectedItem && (
-    <EditPackageModal
-      open={editModalOpen}
-      onClose={closeEditModal}
-      item={selectedItem}
-      handleUpdateItem={handleUpdateItem}
-      handleRemoveItem={handleRemoveItem}
-    />
-  )}
+  };
 
   const fetchCartItems = async () => {
     try {
@@ -107,10 +111,10 @@ function Cart({ user }) {
           <Box sx={{ flex: 3 }}>
             {cartItems.length > 0 ? (
               cartItems.map((item, index) => (
-                <CartItem key={index} item={item} handlePackageClick={handlePackageClick} openEditModal={openEditModal} />
+                <CartItem key={index} item={item} handlePackageClick={handlePackageClick} openEditModal={openEditModal} handleRemoveItem={handleRemoveItem} />
               ))
             ) : (
-              <Typography se={{  textAlign: 'center' }}>No items in cart.</Typography>
+              <Typography>No items in cart.</Typography>
             )}
           </Box>
 
@@ -153,7 +157,7 @@ function Cart({ user }) {
                       overflow: 'hidden',
                       textOverflow: 'ellipsis',
                       display: 'block',
-                      maxWidth: '150px',
+                      maxWidth: '250px',
                     }}
                   >
                     {item.travellers}x {item.packageName}
@@ -181,13 +185,24 @@ function Cart({ user }) {
             handleRemoveItem={handleRemoveItem}
           />
         )}
+
+        {/* Snackbar */}
+        <Snackbar
+          open={snackbarOpen}
+          autoHideDuration={3000}  // Automatically hide after 3 seconds
+          onClose={handleSnackbarClose}
+        >
+          <Alert onClose={handleSnackbarClose} severity="success" sx={{ width: '100%' }}>
+            {snackbarMessage}
+          </Alert>
+        </Snackbar>
       </Box>
     </LocalizationProvider>
   );
 }
 
 // Component to render each cart item
-const CartItem = ({ item, handlePackageClick, openEditModal }) => (
+const CartItem = ({ item, handlePackageClick, handleRemoveItem, openEditModal }) => (
   <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 2, padding: '10px', border: '2px solid #ccc', borderRadius: '8px' }}>
     {/* Package Image */}
     <Box sx={{ width: '355px', height: '200px', overflow: 'hidden', mr: 3 }}>
@@ -217,13 +232,30 @@ const CartItem = ({ item, handlePackageClick, openEditModal }) => (
 
     {/* Dates and Price */}
     <Box sx={{ display: 'flex', flexDirection: 'column', justifyContent: 'center', gap: 2 }}>
-      <Typography>Start Date: {formatDate(item.startDate)}</Typography>
-      <Typography>End Date: {formatDate(item.endDate)}</Typography>
-      <Typography>Price: ${item.price}</Typography>
-      <Typography>Travellers: {item.travellers}</Typography>
-      <Button variant="contained" onClick={() => openEditModal(item)}>
-        Edit
-      </Button>
+      <Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
+        <Typography>Start:</Typography>
+        <Typography sx={{ textAlign: 'right' }}>{formatDate(item.startDate)}</Typography>
+      </Box>
+      <Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
+        <Typography>End:</Typography>
+        <Typography sx={{ textAlign: 'right' }}>{formatDate(item.endDate)}</Typography>
+      </Box>
+      <Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
+        <Typography>Price:</Typography>
+        <Typography sx={{ textAlign: 'right' }}>${item.price}</Typography>
+      </Box>
+      <Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
+        <Typography>Travellers:</Typography>
+        <Typography sx={{ textAlign: 'right' }}>{item.travellers}</Typography>
+      </Box>
+      <Box sx={{ display: 'flex', gap: 2 }}>
+        <Button variant="contained" onClick={() => openEditModal(item)} color="primary" sx={{ minWidth: '100px'}}>
+          Edit
+        </Button>
+        <Button variant="contained" onClick={() => handleRemoveItem(item)} color="error" sx={{ minWidth: '100px'}}>
+          Delete
+        </Button>
+      </Box>
     </Box>
   </Box>
 );

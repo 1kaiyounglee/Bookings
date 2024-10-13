@@ -229,6 +229,7 @@ function BrowsePackages() {
             {filteredPackages.map((pkg, index) => (
               <Grid item xs={12} md={6} key={index}>
                 <Box
+                  onClick={() => navigate(`/package/${pkg.package_id}`)}
                   sx={{
                     border: '1px solid #ccc',
                     borderRadius: '8px',
