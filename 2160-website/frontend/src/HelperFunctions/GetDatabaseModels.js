@@ -231,12 +231,12 @@ export async function getCartItems(email) {
 export async function getPackagesGeneral(whereClause = "") {
   // Build the base query with a dynamic WHERE clause
   const query = `
-    SELECT p.package_id, p.name, p.description, p.duration, p.price, l.city AS location_city, l.country AS location_country
+    SELECT p.package_id, p.name, p.description, p.duration, p.price, p.location_id, l.city AS location_city, l.country AS location_country
     FROM Packages p
     LEFT JOIN Locations l ON p.location_id = l.location_id
     ${whereClause ? `WHERE ${whereClause}` : ''}
   `;
-  
+
   const data = await fetchDatabaseData(query);
 
   if (!data) {
@@ -274,11 +274,12 @@ export async function getPackagesGeneral(whereClause = "") {
     return {
       package_id: pkg.package_id,
       name: pkg.name, // Package name
-      description: pkg.description ,
-      duration: pkg.duration ,
-      price: pkg.price ,
-      location_city: pkg.location_city ,
-      location_country: pkg.location_country ,
+      description: pkg.description,
+      duration: pkg.duration,
+      price: pkg.price,
+      location_id: pkg.location_id, // Now include location_id
+      location_city: pkg.location_city,
+      location_country: pkg.location_country,
       images: imagePaths,
       hasImages: hasImages,
       categories: themeNames.length > 0 ? themeNames : [] // Now returns theme names instead of IDs
@@ -287,6 +288,7 @@ export async function getPackagesGeneral(whereClause = "") {
 
   return packages;
 }
+
 
 export async function getBookings() {
   // Fetch the bookings data from the Bookings table
@@ -346,14 +348,17 @@ export async function getLocations() {
 
 // Function to fetch all categories (themes)
 export async function getCategories() {
-  const query = `SELECT DISTINCT name FROM Categories`;
+  const query = `SELECT category_id, name FROM Categories`;
   const data = await fetchDatabaseData(query);
 
   if (!data) {
     throw new Error("Failed to fetch category data");
   }
 
-  return data.map(category => category.name);
+  return data.map(category => ({
+    category_id: category.category_id,
+    name: category.name
+  }));
 }
 
 // Function to fetch distinct locations (city and country)
