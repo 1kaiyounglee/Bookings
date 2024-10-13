@@ -1,9 +1,10 @@
 import React, { useState, useEffect } from 'react';
-import { useParams } from 'react-router-dom';
+import { useParams, useNavigate } from 'react-router-dom';
 import { getPackagesGeneral } from '../HelperFunctions/GetDatabaseModels';
 import { Box, Typography, Button, TextField, IconButton, Modal, Snackbar, Alert } from '@mui/material';
 import ArrowBackIos from '@mui/icons-material/ArrowBackIos';
 import ArrowForwardIos from '@mui/icons-material/ArrowForwardIos';
+import CloseRoundedIcon from '@mui/icons-material/CloseRounded';
 import { DatePicker } from '@mui/x-date-pickers/DatePicker';
 import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
 import { AdapterDateFns } from '@mui/x-date-pickers/AdapterDateFns';
@@ -23,6 +24,7 @@ function PackageDetails({ user }) {
   const [snackbarOpen, setSnackbarOpen] = useState(false);
   const [snackbarSeverity, setSnackbarSeverity] = useState('success');
   const [isAddedToCart, setisAddedToCart] = useState(false);
+  const navigate = useNavigate();
 
   useEffect(() => {
     async function fetchPackage() {
@@ -110,8 +112,20 @@ function PackageDetails({ user }) {
 
   return (
     <>
-      <Box sx={{ padding: '20px' }}>
+      <Box sx={{ position: 'relative', padding: '20px' }}> {/* Ensure the parent Box has relative positioning */}
         <ArrowBackIos onClick={() => window.history.back()} style={{ cursor: 'pointer' }} />
+        {user.isAdmin && (
+          <Box sx={{ position: 'absolute', top: '20px', right: '20px' }}>  {/* Absolute position inside relatively positioned parent */}
+            <Button
+              variant="contained"
+              color="primary"
+              onClick={() => navigate(`/edit-package/${packageId}`)}
+            >
+              Edit Package
+            </Button>
+          </Box>
+        )}
+
         <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
           <Typography variant="h4" sx={{ fontWeight: 'bold', mb: 2 }}>{packageData.name}</Typography>
           <Typography variant="h6" sx={{ mb: 3 }}>
@@ -238,6 +252,21 @@ function PackageDetails({ user }) {
               objectFit: 'contain',
             }}
           />
+          {/* Close button inside the modal */}
+          <IconButton
+            size="small"
+            sx={{
+              position: 'absolute',
+              top: 10,
+              right: 10,
+              color: 'white',
+              backgroundColor: 'rgba(0, 0, 0, 0.5)',
+              '&:hover': { backgroundColor: 'rgba(0, 0, 0, 0.7)' },
+            }}
+            onClick={() => setOpenModal(false)} // Close the modal when clicked
+          >
+            <CloseRoundedIcon/>
+          </IconButton>
 
           {/* Left Arrow */}
           {packageData.images.length > 1 && (

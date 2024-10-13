@@ -8,6 +8,7 @@ import Navbar from './Components/Navbar';
 import HomePage from './Pages/HomePage';
 import Account from './Pages/Account';
 import PackageDetails from './Pages/PackageDetails';
+import EditPackageDetails from './Pages/EditPackageDetails';
 import MyBookings from './Pages/MyBookings';
 import Cart from './Pages/Cart';
 import BrowsePackages from './Pages/BrowsePackages';
@@ -108,6 +109,7 @@ function App() {
           <Routes>
             <Route path="/" element={<HomePage />} />
             <Route path="/package/:packageId" element={<PackageDetails user={user}/>} />
+            {user.isAdmin && <Route path="/edit-package/:packageId" element={<EditPackageDetails user={user}/>} />}
             {user.isLoggedIn && <Route path="/bookings" element={<MyBookings user={user}/>} />}
             {user.isLoggedIn && <Route path="/cart" element={<Cart user = {user}/>}/>}
             {user.isAdmin && <Route path="/admin" element={<AdminPanel user={user}/>} />}  {/* Admin route */}
