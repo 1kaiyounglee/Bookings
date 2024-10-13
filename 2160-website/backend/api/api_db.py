@@ -2,6 +2,7 @@ from flask import Blueprint, request, jsonify
 from helper_modules import db_helper as db
 import pandas as pd
 import bcrypt  # Import bcrypt for password hashing
+import traceback
 
 api_db = Blueprint('database', __name__)
 
@@ -149,9 +150,9 @@ def update_booking():
     except Exception as e:
         return jsonify({"error": str(e)}), 500
     
+
 @api_db.route('/upsert_package', methods=['POST'])
 def upsert_package():
-    
     data = request.json
     print(data)
     try:
@@ -165,17 +166,77 @@ def upsert_package():
             'price': data['price']
         }
 
-        print(f"Upserting package with data: {package_data}")
-        df = pd.DataFrame([package_data])
-        print(df)
-        success = db.upsert_data('Packages', df)
+        # Upsert the package data into the Packages table
+        package_query = """
+        INSERT INTO Packages (package_id, name, description, location_id, duration, price)
+        VALUES (:package_id, :name, :description, :location_id, :duration, :price)
+        ON CONFLICT(package_id) DO UPDATE SET 
+            name = :name, 
+            description = :description,
+            location_id = :location_id,
+            duration = :duration,
+            price = :price
+        """
+        db.execute_query(package_query, package_data)
+        print("exec successful")
+        package_id = data['package_id']
 
-        if success:
-            return jsonify({"message": "Package upserted successfully"}), 200
+        # Extract category names from the request and get the category_ids
+        category_names = data.get('categories', [])  # These are the category_name values
+        new_category_ids = set()
+
+        # Use a for loop to fetch each category_id based on the category_name
+        for category_name in category_names:
+            query = """
+                SELECT category_id FROM Categories WHERE name = :name
+            """
+            result = db.execute_query(query, {'name': category_name}).fetchone()
+            if result:
+                new_category_ids.add(result[0])  # Access the first element of the result tuple
+
+        # If package_id is not 'new', we handle updating categories
+        if package_id != 'new':
+            # Fetch existing category ids for this package
+            query = "SELECT category_id FROM PackageCategory WHERE package_id = :package_id"
+            existing_categories = db.execute_query(query, {'package_id': package_id}).fetchall()
+            existing_category_ids = set([cat[0] for cat in existing_categories])  # Access first element of each tuple
+
+            # Find categories to add and categories to remove
+            categories_to_add = new_category_ids - existing_category_ids
+            categories_to_remove = existing_category_ids - new_category_ids
+
+            # Add new categories
+            for category_id in categories_to_add:
+                package_category_query = """
+                INSERT INTO PackageCategory (package_id, category_id)
+                VALUES (:package_id, :category_id)
+                """
+                db.execute_query(package_category_query, {'package_id': package_id, 'category_id': category_id})
+
+            # Remove categories no longer assigned
+            for category_id in categories_to_remove:
+                delete_query = "DELETE FROM PackageCategory WHERE package_id = :package_id AND category_id = :category_id"
+                db.execute_query(delete_query, {'package_id': package_id, 'category_id': category_id})
+
         else:
-            return jsonify({"message": "Failed to upsert package"}), 500
+            # Handle the case for a new package (only adding categories)
+            for category_id in new_category_ids:
+                package_category_query = """
+                INSERT INTO PackageCategory (package_id, category_id)
+                VALUES (:package_id, :category_id)
+                """
+                db.execute_query(package_category_query, {'package_id': package_id, 'category_id': category_id})
+
+        return jsonify({"message": "Package upserted successfully, categories updated"}), 200
     except Exception as e:
+        print(traceback.format_exc())
         return jsonify({"error": str(e)}), 500
+
+
+
+
+
+
 
 @api_db.route('/delete_package', methods=['POST'])
 def delete_package():
