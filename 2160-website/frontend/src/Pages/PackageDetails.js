@@ -115,7 +115,7 @@ function PackageDetails({ user }) {
         <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
           <Typography variant="h4" sx={{ fontWeight: 'bold', mb: 2 }}>{packageData.name}</Typography>
           <Typography variant="h6" sx={{ mb: 3 }}>
-            {packageData.location_city}, {packageData.location_country}  {/* Display city and country */}
+            {packageData.location_city}, {packageData.location_country}
           </Typography>
 
           {/* Display images in a row */}
@@ -141,15 +141,15 @@ function PackageDetails({ user }) {
             )}
           </Box>
 
-          {/* Layout with description and details */}
-          <Box sx={{ display: 'flex', justifyContent: 'space-between', width: '100%', paddingTop: '40px' }}>
-            {/* Description and Themes */}
-            <Box sx={{ width: '50%', textAlign: 'left', paddingLeft: '20px' }}>
+          {/* Separate layout for description and "Add to Cart" */}
+          <Box sx={{ display: 'flex', justifyContent: 'center', width: '100%', marginTop: '40px' }}>
+            {/* Description Box */}
+            <Box sx={{ width: '60%', textAlign: 'left', padding: '20px', border: '1px solid #ccc', borderRadius: '8px', }}>
               <Typography sx={{ mb: 3 }}>{packageData.description}</Typography>
               <Typography>Themes: {packageData.categories.join(', ')}</Typography>
             </Box>
 
-            {/* Price, Duration, Travellers, Dates */}
+            {/* "Add to Cart" Box moved outside of the description */}
             <Box
               sx={{
                 display: 'flex',
@@ -159,6 +159,7 @@ function PackageDetails({ user }) {
                 padding: '20px',
                 borderRadius: '8px',
                 maxWidth: '350px',
+                marginLeft: '20px',  // Adds space between the boxes
               }}
             >
               <Typography>Price: ${packageData.price}</Typography>
