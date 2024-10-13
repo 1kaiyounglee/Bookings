@@ -80,6 +80,7 @@ function ManagePackagesModal({ open, onClose }) {
     }
     setSelectedPackage(packageId);
   };
+  console.log(packageDetails, "SLECTED PACKAGE D ET AILS");
 
   // Handle form input changes
   const handleInputChange = (e) => {
@@ -242,22 +243,24 @@ function ManagePackagesModal({ open, onClose }) {
             required
             sx={{ mb: 2 }}
           />
-          <TextField
-            select
-            label="Location"
-            name="location_id"
-            value={packageDetails.location_id}
-            onChange={(e) => handleLocationSelect(e.target.value)}
-            fullWidth
-            required
-            sx={{ mb: 2 }}
-          >
-            {locations.map((loc) => (
-              <MenuItem key={loc.location_id} value={loc.location_id}>
-                {loc.city}, {loc.country}
-              </MenuItem>
-            ))}
-          </TextField>
+          {locations.length > 0 && (
+            <TextField
+              select
+              label="Location"
+              name="location_id"
+              value={packageDetails.location_id || ''}  // Ensure the correct location_id is set from the selected package
+              onChange={(e) => handleLocationSelect(e.target.value)}  // Updates location_id
+              fullWidth
+              required
+              sx={{ mb: 2 }}
+            >
+              {locations.map((loc) => (
+                <MenuItem key={loc.location_id} value={loc.location_id}>
+                  {loc.city}, {loc.country}
+                </MenuItem>
+              ))}
+            </TextField>
+          )}
           <TextField
             label="Duration"
             name="duration"
