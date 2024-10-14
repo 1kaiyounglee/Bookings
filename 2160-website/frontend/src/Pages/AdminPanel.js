@@ -3,12 +3,13 @@ import { Box, Button, Typography } from '@mui/material';
 import ManageUsersModal from '../Components/ManageUsersModal'; // Separate file for Manage Users Modal
 import ManageBookingsModal from '../Components/ManageBookingsModal'; // Separate file for Manage Bookings Modal
 import ManagePackagesModal from '../Components/ManagePackagesModal'; // Separate file for Manage Packages Modal
+import { useNavigate } from 'react-router-dom';
 
 function AdminPanel() {
   const [isUsersModalOpen, setIsUsersModalOpen] = useState(false);
   const [isBookingsModalOpen, setIsBookingsModalOpen] = useState(false);
   const [isPackagesModalOpen, setIsPackagesModalOpen] = useState(false);
-
+  const navigate = useNavigate();
 
   const handleUsersModalOpen = () => {
     setIsUsersModalOpen(true);
@@ -26,8 +27,8 @@ function AdminPanel() {
     setIsBookingsModalOpen(false);
   };
 
-  const handlePackagesModalOpen = () => {
-    setIsPackagesModalOpen(true);
+  const handleEditPackages = () => {
+    navigate("/edit-package/new")
   };
 
   const handlePackagesModalClose = () => {
@@ -46,8 +47,8 @@ function AdminPanel() {
         Manage Bookings
       </Button>
 
-      <Button variant="contained" sx={{ margin: '20px' }} onClick={handlePackagesModalOpen}>
-        Manage Packages
+      <Button variant="contained" sx={{ margin: '20px' }} onClick={handleEditPackages}>
+        Add Package
       </Button>
 
       {/* Manage Users Modal */}
