@@ -202,6 +202,52 @@ export async function upsertPackage(packageData) {
   }
 }
 
+export async function insertPackageImages(packageId, images) {
+  try {
+    // Create a FormData object to send both the packageId and the images
+    const formData = new FormData();
+    
+    // Append the packageId
+    formData.append('package_id', packageId);
+
+    // Append the images to FormData (images should be an array of files)
+    images.forEach((image) => {
+      formData.append('images', image);  // 'images' is the key your backend expects
+    });
+
+    // Send the POST request to your backend
+    const response = await fetch('http://localhost:5000/api/database/upload', {
+      method: 'POST',
+      body: formData,
+    });
+
+    // Check if the response is OK before parsing JSON
+    if (!response.ok) {
+      throw new Error(`HTTP error! Status: ${response.status}`);
+    }
+
+    // Try to parse the response as JSON
+    let data;
+    try {
+      data = await response.json();
+    } catch (error) {
+      throw new Error('Failed to parse JSON. The server may have returned an HTML error page.');
+    }
+
+    // Check if the response data indicates success
+    if (data && data.fileUrls) {
+      console.log('Images uploaded successfully:', data.fileUrls);  // Display the URLs of uploaded images
+      return data.fileUrls;  // Return the uploaded image URLs to use in the UI
+    } else {
+      throw new Error('Image upload failed: Invalid response from server');
+    }
+
+  } catch (error) {
+    console.error('An error occurred while uploading the images:', error);
+    throw error;  // Rethrow the error to be caught by any error handlers
+  }
+}
+
 
 // Delete a package
 export async function deletePackage(packageId) {

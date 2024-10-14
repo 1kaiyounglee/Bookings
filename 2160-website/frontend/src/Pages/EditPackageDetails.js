@@ -4,7 +4,7 @@ import { Box, TextField, Button, Snackbar, Alert, MenuItem, Typography, Chip, Mo
 import ArrowBackIos from '@mui/icons-material/ArrowBackIos';
 import ArrowForwardIos from '@mui/icons-material/ArrowForwardIos';
 import { getPackagesGeneral, getLocations, getCategories } from '../HelperFunctions/GetDatabaseModels'; // Fetching data
-import { upsertPackage, deletePackage } from '../HelperFunctions/SendData'; // CRUD operations
+import { upsertPackage, deletePackage, insertPackageImages } from '../HelperFunctions/SendData'; // CRUD operations
 import CloudUploadIcon from '@mui/icons-material/CloudUpload';
 import CloseRoundedIcon from '@mui/icons-material/CloseRounded';
 
@@ -139,10 +139,11 @@ function EditPackageDetails() {
         package_id: packageId,
         categories: selectedThemes,
       };
-
       await upsertPackage(packageData);
-      showSnackbar('Package updated successfully!');
+      const imageFiles = newImages.map((image) => image.file);
+      await insertPackageImages(packageId, imageFiles);
       navigate(`/package/${packageId}`); // Redirect to packages list or a success page
+
     } catch (error) {
       console.error('Error upserting package:', error);
       showSnackbar('Failed to update package.');

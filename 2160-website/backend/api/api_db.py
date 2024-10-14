@@ -1,8 +1,9 @@
-from flask import Blueprint, request, jsonify
+from flask import Blueprint, request, jsonify, send_from_directory, current_app
 from helper_modules import db_helper as db
 import pandas as pd
 import bcrypt  # Import bcrypt for password hashing
 import traceback
+import os
 
 api_db = Blueprint('database', __name__)
 
@@ -280,3 +281,81 @@ def change_password():
 
     except Exception as e:
         return jsonify({'error': str(e)}), 500
+
+
+#### STUFF FOR FILE UPLOAD ACCORDING TO A GOOD FRIEND
+# Configure the upload folder
+ALLOWED_EXTENSIONS = {'jpg', 'jpeg'}
+
+def allowed_file(filename):
+    return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
+
+@api_db.route('/upload', methods=['POST'])
+def upload_file():
+    try:
+        package_id = request.form.get('package_id')
+        print(f"Received package_id: {package_id}")  # Debugging
+
+        if not package_id:
+            print("Package ID is missing")  # Debugging
+            return jsonify({'error': 'Package ID is required'}), 400
+
+        if 'images' not in request.files:
+            print("No image file provided")  # Debugging
+            return jsonify({'error': 'No image file provided'}), 400
+
+        files = request.files.getlist('images')
+        print(f"Received files: {files}")  # Debugging
+        uploaded_file_urls = []
+
+        for file in files:
+            if file and allowed_file(file.filename):
+                print(f"Processing file: {file.filename}")  # Debugging
+                
+                # Inserting new image into the database
+                temp_filename = f"temp{os.path.splitext(file.filename)[1]}"
+                image_insert_query = """
+                    INSERT INTO PackageImages (package_id, image_path)
+                    VALUES (:package_id, :image_path)
+                """
+                image_data = {'package_id': package_id, 'image_path': temp_filename}
+                db.execute_query(image_insert_query, image_data)
+
+                # Generating the new image id
+                result = db.execute_query("SELECT MAX(image_id) FROM PackageImages").fetchone()[0]
+                new_image_id = (result or 0)
+
+                # Renaming the file
+                filename = f"{new_image_id}{os.path.splitext(file.filename)[1]}"  # Use the image_id with original file extension
+                upload_folder = os.path.join(current_app.config['UPLOAD_FOLDER'])
+                file.save(os.path.join(upload_folder, filename))
+
+                # Step 4: Update the image path in the database with the correct filename
+                update_image_path_query = """
+                    UPDATE PackageImages SET image_path = :image_path WHERE image_id = :image_id
+                """
+                update_data = {'image_path': f"package_images/{filename}", 'image_id': new_image_id}
+                db.execute_query(update_image_path_query, update_data)
+
+                # Append the file URL to return to the frontend
+                uploaded_file_urls.append(f"/uploads/{filename}")
+
+        print("All files processed successfully")  # Debugging
+        return jsonify({'message': 'Images uploaded successfully!', 'fileUrls': uploaded_file_urls}), 200
+
+    except Exception as e:
+        print("Error occurred during file upload")
+        print(traceback.format_exc())  # Print detailed error traceback to the logs
+        return jsonify({'error': 'An error occurred during the upload process'}), 500
+
+
+# Route to serve the uploaded images
+@api_db.route('/uploads/<filename>')
+def uploaded_file(filename):
+    try:
+        # Access UPLOAD_FOLDER from current_app.config
+        upload_folder = current_app.config['UPLOAD_FOLDER']
+        return send_from_directory(upload_folder, filename)
+    except Exception as e:
+        traceback.print_exc()
+        return jsonify({'error': 'File not found'}), 404

@@ -12,7 +12,9 @@ from api.api_auth import auth_bp  # Import auth routes
 app = Flask(__name__)
 
 # Enable CORS for all routes
-CORS(app, resources={r"/api/*": {"origins": "http://localhost:3000"}}, supports_credentials=True)
+CORS(app, resources={r"/api/*": {"origins": "http://localhost:3000"},
+                     r"/upload": {"origins": "http://localhost:3000"}},           
+                    supports_credentials=True)
 
 # JWT configuration
 app.config['JWT_SECRET_KEY'] = 'secret_key'  # Change this to a strong secret key
@@ -28,6 +30,7 @@ app.register_blueprint(auth_bp, url_prefix="/api/auth")  # Register auth bluepri
 def serve_image(filename):
     return send_from_directory(os.path.join(app.root_path, 'images'), filename)
 
+app.config['UPLOAD_FOLDER'] = 'images/package_images'
 
 
 if __name__ == "__main__":
