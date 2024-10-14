@@ -6,6 +6,7 @@ from helper_modules import db_helper as db
 from paypalcheckoutsdk.core import PayPalHttpClient, SandboxEnvironment
 from paypalcheckoutsdk.orders import OrdersCreateRequest, OrdersCaptureRequest
 from dotenv import load_dotenv
+import time
 
 api_orders = Blueprint('orders', __name__)
 load_dotenv()
@@ -175,18 +176,21 @@ def update_bookings_and_orders():
             INSERT INTO Orders (email, total_price, order_date, payment_date, payment_status)
             VALUES (:email, :total_price, :order_date, :payment_date, 'paid')
         """
-        db.execute_query(insert_order_query, {
+        order_params = {
             'email': user_email,
             'total_price': total_price,
             'order_date': datetime.now().strftime('%Y-%m-%d'),
             'payment_date': datetime.now().strftime('%Y-%m-%d')
-        })
+        }
+        db.execute_query(insert_order_query, order_params)
+        fetch_order_id_query = """
+            SELECT order_id FROM Orders
+            WHERE email = :email AND total_price = :total_price AND order_date = :order_date AND payment_date = :payment_date
+            ORDER BY order_id DESC LIMIT 1
+        """
 
-        # Fetch the last inserted order ID
-        last_order_id_query = "SELECT last_insert_rowid()"
-        result = db.execute_query(last_order_id_query)
-        order_id = result.fetchone()[0]  # Access the first element in the tuple
-
+        order_id = int(db.fetch_data(fetch_order_id_query, order_params)['order_id'][0])
+        print(f"ORDERID: {order_id}")
         if not order_id:
             return jsonify({"error": "Failed to retrieve order ID"}), 500
 
@@ -203,7 +207,7 @@ def update_bookings_and_orders():
 
             # Optionally update the booking status to 'confirmed' or any other status
             update_booking_query = """
-                UPDATE Bookings SET status = 'confirmed'
+                UPDATE Bookings SET status = 'pending'
                 WHERE booking_id = :booking_id
             """
             db.execute_query(update_booking_query, {'booking_id': booking_id})

@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import { PayPalScriptProvider, PayPalButtons } from "@paypal/react-paypal-js";
 import { Box, IconButton, Typography, Button, Modal, Alert } from "@mui/material";
 import CloseRoundedIcon from '@mui/icons-material/CloseRounded';
+import { useNavigate } from "react-router-dom";
 
 const modalStyle = {
   position: 'absolute',
@@ -19,7 +20,7 @@ function CheckoutModal({ open, onClose, cartItems, totalPrice, userData }) {
   const clientID = process.env.REACT_APP_PAYPAL_CLIENT_ID;
   const [successMessage, setSuccessMessage] = useState("");
   const [errorMessage, setErrorMessage] = useState("");
-
+  const navigate = useNavigate();
   // PayPal client ID and configuration
   const initialOptions = {
     "client-id": clientID,
@@ -50,7 +51,7 @@ function CheckoutModal({ open, onClose, cartItems, totalPrice, userData }) {
         console.log('Order updated successfully:', result.order_id);
         setSuccessMessage("Payment completed and order updated successfully!");
         setTimeout(() => {
-          window.location.reload(); // Clear cart and reload page after success
+          navigate("/bookings")
         }, 1500);
       } else {
         setErrorMessage("Failed to update order: " + result.error);

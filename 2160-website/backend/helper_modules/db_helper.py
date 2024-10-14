@@ -251,3 +251,48 @@ def extract_table_name(query):
 
 
 
+def execute_query_with_returning(query, params=None):
+    """
+    Executes a given SQL query, commits the transaction, and returns the primary key
+    (or the last inserted row id) of the created row.
+    
+    Args:
+        query (str): The SQL query to execute.
+        params (dict): Optional dictionary of parameters to bind to the query.
+    
+    Returns:
+        int: The primary key of the last inserted row (or None if not applicable).
+    """
+    session = None
+    try:
+        session = Session()  # Get a new database session
+
+        if params:
+            result = session.execute(text(query), params)
+        else:
+            result = session.execute(text(query))
+
+        # Commit the transaction
+        session.commit()
+
+        # For SQLite or databases that support `last_insert_rowid()`
+        last_insert_id_query = "SELECT last_insert_rowid()"
+        result = session.execute(text(last_insert_id_query))
+        row = result.fetchone()  # Store the result of fetchone() in a variable
+        if row:
+            print(row)
+            pk = row[0]  # Access the first element in the tuple, which is the primary key
+            print(f"Primary key (last inserted row id): {pk}")
+            return pk
+        else:
+            print("No row was returned for last_insert_rowid()")
+            return None
+
+    except Exception as e:
+        if session:
+            session.rollback()  # Rollback the transaction in case of error
+        print(f"Error executing query: {traceback.format_exc()}")
+        return None
+    finally:
+        if session:
+            session.close()  # Always close the session after the query is done
