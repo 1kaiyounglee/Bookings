@@ -47,7 +47,7 @@ def delete_entry():
             return jsonify({'error': 'Table name or entry id for deletion not provided.'}), 400
 
         # Construct the SQL delete query dynamically
-        delete_query = f"DELETE FROM {table_name} WHERE booking_id = {entry_id}"
+        delete_query = f"DELETE FROM {table_name}s WHERE {table_name}_id = {entry_id}"
 
         print(delete_query)
         # Execute the delete query
@@ -62,7 +62,7 @@ def delete_entry():
     except Exception as e:
         print(str(e))
         return jsonify({'error': str(e)}), 500
-    
+
 
 @api_db.route('/create_user', methods=['POST'])
 def create_user():
@@ -329,6 +329,7 @@ def upload_file():
                 filename = f"{new_image_id}{os.path.splitext(file.filename)[1]}"  # Use the image_id with original file extension
                 upload_folder = os.path.join(current_app.config['UPLOAD_FOLDER'])
                 file.save(os.path.join(upload_folder, filename))
+                print(f"added new image: {os.path.join(upload_folder, filename)}")
 
                 # Step 4: Update the image path in the database with the correct filename
                 update_image_path_query = """
@@ -359,3 +360,38 @@ def uploaded_file(filename):
     except Exception as e:
         traceback.print_exc()
         return jsonify({'error': 'File not found'}), 404
+    
+
+@api_db.route('/delete_package_images', methods=['DELETE'])
+def delete_package_images():
+    try:
+        # Get the image IDs from the request body (should be an array of image IDs)
+        data = request.json
+        image_ids = data.get('image_ids', [])
+
+        if not image_ids:
+            return jsonify({"error": "No image IDs provided"}), 400
+
+        fetch_query = f"SELECT image_path FROM PackageImages WHERE image_id IN ({', '.join(map(str, image_ids))})"
+        result = db.execute_query(fetch_query)
+
+        # Accessing the result by index (assuming image_path is the first column)
+        image_paths = [row[0] for row in result]  # row[0] if image_path is the first column
+        
+        # Delete each image from the file system
+        for image_path in image_paths:
+            full_image_path = os.path.join(current_app.config['UPLOAD_FOLDER'], image_path.replace('package_images/', ''))
+            if os.path.exists(full_image_path):
+                os.remove(full_image_path)
+                print(f"Deleted file: {full_image_path}")
+            else:
+                print(f"File not found: {full_image_path}")
+
+        delete_query = f"DELETE FROM PackageImages WHERE image_id IN ({', '.join(map(str, image_ids))})"
+        result = db.execute_query(delete_query)
+
+        return jsonify({"message": f"{result.rowcount} images deleted successfully."}), 200
+
+    except Exception as e:
+        print(str(e))
+        return jsonify({"error": str(e)}), 500

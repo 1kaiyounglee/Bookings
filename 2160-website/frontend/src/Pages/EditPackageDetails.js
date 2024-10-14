@@ -4,7 +4,7 @@ import { Box, TextField, Button, Snackbar, Alert, MenuItem, Typography, Chip, Mo
 import ArrowBackIos from '@mui/icons-material/ArrowBackIos';
 import ArrowForwardIos from '@mui/icons-material/ArrowForwardIos';
 import { getPackagesGeneral, getLocations, getCategories } from '../HelperFunctions/GetDatabaseModels'; // Fetching data
-import { upsertPackage, deletePackage, insertPackageImages } from '../HelperFunctions/SendData'; // CRUD operations
+import { upsertPackage, deletePackage, insertPackageImages, deletePackageImages } from '../HelperFunctions/SendData'; // CRUD operations
 import CloudUploadIcon from '@mui/icons-material/CloudUpload';
 import CloseRoundedIcon from '@mui/icons-material/CloseRounded';
 
@@ -24,6 +24,7 @@ function EditPackageDetails() {
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
   const [openPreviewModal, setOpenPreviewModal] = useState(false);
   const [newImages, setNewImages] = useState([]);
+  const [deletedImages, setDeletedImages] = useState([]);
   const [snackbarMessage, setSnackbarMessage] = useState('');
   const [snackbarOpen, setSnackbarOpen] = useState(false);
 
@@ -109,6 +110,37 @@ function EditPackageDetails() {
     }
   };
 
+  const handleImageRemove = (index, type) => {
+    if (type === 'new') {
+      // Remove from newImages array
+      const updatedNewImages = newImages.filter((_, imgIndex) => imgIndex !== index);
+      setNewImages(updatedNewImages);
+    } else if (type === 'existing') {
+      // Remove from existing images
+      const updatedExistingImages = [...packageDetails.images];
+      const removedImageUrl = updatedExistingImages.splice(index, 1)[0]; // Get the removed image URL
+  
+      // Extract the image_id from the image URL
+      const imageId = removedImageUrl.split('/').pop().split('.')[0]; // Extract the ID part of the URL
+  
+      console.log('Removed Image ID:', imageId);
+  
+      setPackageDetails((prevDetails) => ({
+        ...prevDetails,
+        images: updatedExistingImages,
+      }));
+  
+      // Store the extracted image_id in deletedImages
+      setDeletedImages((prev) => {
+        // Check if the imageId is already in the array
+        if (!prev.includes(imageId)) {
+          return [...prev, imageId];
+        }
+        return prev; // If the imageId already exists, return the array as is
+      });
+    }
+  };
+
   const VisuallyHiddenInput = ({ onChange, multiple }) => (
     <input
       type="file"
@@ -139,10 +171,17 @@ function EditPackageDetails() {
         categories: selectedThemes,
       };
       await upsertPackage(packageData);
+      
       if (newImages.length > 0) {
         const imageFiles = newImages.map((image) => image.file);
         await insertPackageImages(packageId, imageFiles);
       }
+
+      if (deletedImages.length > 0) {
+        console.log(deletedImages)
+        await deletePackageImages(deletedImages);
+      }
+  
       navigate(`/package/${packageId}`); // Redirect to packages list or a success page
     } catch (error) {
       console.error('Error upserting package:', error);
@@ -221,14 +260,88 @@ function EditPackageDetails() {
           <Box sx={{ mb: 2 }}>
             <Typography variant="subtitle1">Package Images:</Typography>
             <Box sx={{ display: 'flex', gap: 2, flexWrap: 'wrap' }}>
-              {[...packageDetails.images, ...newImages].map((imageUrl, index) => (
-                <img
-                  key={index}
-                  src={imageUrl.preview ? imageUrl.preview : `http://localhost:5000${imageUrl}`}
-                  alt={`Package image ${index}`}
-                  style={{ width: '100px', height: '100px', objectFit: 'cover', borderRadius: '8px' }}
-                  onClick={() => handleImageClick(index)}
-                />
+              {/* Loop for existing images */}
+              {packageDetails.images.map((imageUrl, index) => (
+                <Box
+                  key={`existing-${index}`}
+                  sx={{
+                    position: 'relative',
+                    width: '100px',
+                    height: '100px',
+                    borderRadius: '8px',
+                    overflow: 'hidden',
+                  }}
+                >
+                  <img
+                    src={`http://localhost:5000${imageUrl}`}
+                    alt={`Package image ${index}`}
+                    style={{
+                      width: '100%',
+                      height: '100%',
+                      objectFit: 'cover',
+                    }}
+                    onClick={() => handleImageClick(index)}
+                  />
+
+                  <IconButton
+                    size="small"
+                    sx={{
+                      position: 'absolute',
+                      top: 4,
+                      right: 4,
+                      color: 'white',
+                      '&:hover': { backgroundColor: 'error.main' },
+                      fontSize: '0.8rem',
+                      width: '20px',
+                      height: '20px',
+                    }}
+                    onClick={() => handleImageRemove(index, 'existing')}
+                  >
+                    <CloseRoundedIcon sx={{ fontSize: '16px' }} />
+                  </IconButton>
+                </Box>
+              ))}
+
+              {/* Loop for new images */}
+              {newImages.map((image, index) => (
+                <Box
+                  key={`new-${index}`}
+                  sx={{
+                    position: 'relative',
+                    width: '100px',
+                    height: '100px',
+                    borderRadius: '8px',
+                    overflow: 'hidden',
+                  }}
+                >
+                  <img
+                    src={image.preview}
+                    alt={`New image ${index}`}
+                    style={{
+                      width: '100%',
+                      height: '100%',
+                      objectFit: 'cover',
+                    }}
+                    onClick={() => handleImageClick(index)}
+                  />
+
+                  <IconButton
+                    size="small"
+                    sx={{
+                      position: 'absolute',
+                      top: 4,
+                      right: 4,
+                      color: 'white',
+                      '&:hover': { backgroundColor: 'error.main' },
+                      fontSize: '0.8rem',
+                      width: '20px',
+                      height: '20px',
+                    }}
+                    onClick={() => handleImageRemove(index, 'new')}
+                  >
+                    <CloseRoundedIcon sx={{ fontSize: '16px' }} />
+                  </IconButton>
+                </Box>
               ))}
             </Box>
           </Box>
