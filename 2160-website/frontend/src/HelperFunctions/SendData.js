@@ -163,7 +163,7 @@ export async function removeCartItem(item) {
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({ 
-        table: 'Bookings',
+        table: 'Booking',
         id: item.bookingId
       }),
     });
@@ -268,6 +268,32 @@ export async function deletePackage(packageId) {
   } catch (error) {
     console.error('Error deleting package:', error);
     throw error;
+  }
+}
+
+export async function deletePackageImages( imageIds ) {
+  try {
+    // Send a DELETE request to the backend API
+    const response = await fetch('http://localhost:5000/api/database/delete_package_images', {
+      method: 'DELETE',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ image_ids: imageIds }),  // Pass the image IDs in the request body
+    });
+
+    // Check if the response is successful
+    if (!response.ok) {
+      throw new Error('Failed to delete images');
+    }
+
+    // Parse the response JSON
+    const data = await response.json();
+    console.log(data.message);  // Log the success message
+
+    return data;  // Optionally return the response data for further handling
+  } catch (error) {
+    console.error('Error:', error);  // Log any errors
   }
 }
 
