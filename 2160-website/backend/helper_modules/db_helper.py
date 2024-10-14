@@ -251,5 +251,3 @@ def extract_table_name(query):
 
 
 
-
-

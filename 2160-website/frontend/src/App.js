@@ -13,6 +13,7 @@ import MyBookings from './Pages/MyBookings';
 import Cart from './Pages/Cart';
 import BrowsePackages from './Pages/BrowsePackages';
 import AdminPanel from './Pages/AdminPanel';  // Import AdminPanel page
+import Checkout from "./Components/CheckoutModal"
 import { deepPurple } from '@mui/material/colors';
 const darkTheme = createTheme({
   palette: {
