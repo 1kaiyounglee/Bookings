@@ -290,7 +290,7 @@ function EditPackageDetails() {
                       top: 4,
                       right: 4,
                       color: 'white',
-                      '&:hover': { backgroundColor: 'success.main' },
+                      '&:hover': { backgroundColor: 'error.main' },
                       fontSize: '0.8rem',
                       width: '20px',
                       height: '20px',
