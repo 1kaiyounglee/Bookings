@@ -17,8 +17,9 @@ function MyBookings({ user }) {
     async function fetchOrders() {
       try {
         const orders = await getUserOrders(user.email);
-        console.log(orders);
-        setOrders(orders || []); // Set the fetched orders into state
+        const sortedOrders = orders.sort((a, b) => b.orderId - a.orderId);
+        console.log(sortedOrders);
+        setOrders(sortedOrders || []); // Set the fetched orders into state
       } catch (error) {
         console.error('Error fetching orders:', error);
       } finally {

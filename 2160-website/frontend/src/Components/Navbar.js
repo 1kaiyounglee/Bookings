@@ -55,7 +55,7 @@ function Navbar({ onLoginRegisterClick, handleLogout, user }) {
                 <TravelExploreRoundedIcon />
               </IconButton>
             </Tooltip>
-            <Tooltip title="My Bookings">
+            <Tooltip title="My Orders">
               <IconButton color="inherit" onClick={handleBookingsClick}>
                 <AutoStoriesRoundedIcon />
               </IconButton>
