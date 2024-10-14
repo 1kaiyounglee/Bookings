@@ -14,7 +14,9 @@ from api.api_orders import api_orders
 app = Flask(__name__)
 
 # Enable CORS for all routes
-CORS(app, resources={r"/api/*": {"origins": "http://localhost:3000"}}, supports_credentials=True)
+CORS(app, resources={r"/api/*": {"origins": "http://localhost:3000"},
+                     r"/upload": {"origins": "http://localhost:3000"}},           
+                    supports_credentials=True)
 
 # JWT configuration
 app.config['JWT_SECRET_KEY'] = 'secret_key'  # Change this to a strong secret key
@@ -31,6 +33,7 @@ app.register_blueprint(api_orders, url_prefix="/api/orders")
 def serve_image(filename):
     return send_from_directory(os.path.join(app.root_path, 'images'), filename)
 
+app.config['UPLOAD_FOLDER'] = 'images/package_images'
 
 
 if __name__ == "__main__":
