@@ -25,7 +25,6 @@ function EditPackageDetails() {
   const [openPreviewModal, setOpenPreviewModal] = useState(false);
   const [newImages, setNewImages] = useState([]);
   const [snackbarMessage, setSnackbarMessage] = useState('');
-  const [snackbarSeverity, setSnackbarSeverity] = useState('success');
   const [snackbarOpen, setSnackbarOpen] = useState(false);
 
   // Fetch the list of locations and categories when the component mounts
@@ -140,10 +139,11 @@ function EditPackageDetails() {
         categories: selectedThemes,
       };
       await upsertPackage(packageData);
-      const imageFiles = newImages.map((image) => image.file);
-      await insertPackageImages(packageId, imageFiles);
+      if (newImages.length > 0) {
+        const imageFiles = newImages.map((image) => image.file);
+        await insertPackageImages(packageId, imageFiles);
+      }
       navigate(`/package/${packageId}`); // Redirect to packages list or a success page
-
     } catch (error) {
       console.error('Error upserting package:', error);
       showSnackbar('Failed to update package.');
@@ -377,7 +377,7 @@ function EditPackageDetails() {
 
         {/* Snackbar for feedback messages */}
         <Snackbar open={snackbarOpen} autoHideDuration={3000} onClose={handleSnackbarClose}>
-          <Alert onClose={handleSnackbarClose} severity={snackbarSeverity} sx={{ width: '100%' }}>
+          <Alert onClose={handleSnackbarClose} severity="error" sx={{ width: '100%' }}>
             {snackbarMessage}
           </Alert>
         </Snackbar>
