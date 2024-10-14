@@ -26,7 +26,6 @@ function EditPackageDetails() {
   const [newImages, setNewImages] = useState([]);
   const [deletedImages, setDeletedImages] = useState([]);
   const [snackbarMessage, setSnackbarMessage] = useState('');
-  const [snackbarSeverity, setSnackbarSeverity] = useState('success');
   const [snackbarOpen, setSnackbarOpen] = useState(false);
 
   // Fetch the list of locations and categories when the component mounts
@@ -184,7 +183,6 @@ function EditPackageDetails() {
       }
   
       navigate(`/package/${packageId}`); // Redirect to packages list or a success page
-
     } catch (error) {
       console.error('Error upserting package:', error);
       showSnackbar('Failed to update package.');
@@ -492,7 +490,7 @@ function EditPackageDetails() {
 
         {/* Snackbar for feedback messages */}
         <Snackbar open={snackbarOpen} autoHideDuration={3000} onClose={handleSnackbarClose}>
-          <Alert onClose={handleSnackbarClose} severity={snackbarSeverity} sx={{ width: '100%' }}>
+          <Alert onClose={handleSnackbarClose} severity="error" sx={{ width: '100%' }}>
             {snackbarMessage}
           </Alert>
         </Snackbar>

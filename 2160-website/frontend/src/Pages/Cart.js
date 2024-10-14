@@ -8,14 +8,19 @@ import { enGB } from 'date-fns/locale';
 import { getCartItems } from '../HelperFunctions/GetDatabaseModels';
 import { updateCartItem, removeCartItem } from '../HelperFunctions/SendData'
 import EditPackageModal from '../Components/EditCartModal';
+import CheckoutModal from '../Components/CheckoutModal'; // Import CheckoutModal component
+
 
 function Cart({ user }) {
+  const userData = user;
+  console.log(userData);
   const navigate = useNavigate();
   const [cartItems, setCartItems] = useState([]);
   const [loading, setLoading] = useState(true);
   const [totalPrice, setTotalPrice] = useState(0);
   const [selectedItem, setSelectedItem] = useState(null); // Track the selected item for editing
   const [editModalOpen, setEditModalOpen] = useState(false);
+  const [checkoutModalOpen, setCheckoutModalOpen] = useState(false);
   const [snackbarMessage, setSnackbarMessage] = useState('');
   const [snackbarOpen, setSnackbarOpen] = useState(false)
 
@@ -58,7 +63,12 @@ function Cart({ user }) {
     setSelectedItem(item); // Set the item to be edited
     setEditModalOpen(true); // Open the modal
   };
-
+  const openCheckoutModal = () =>{
+    setCheckoutModalOpen(true);
+  }
+  const closeCheckoutModal = () =>{
+    setCheckoutModalOpen(false);
+  }
   const fetchCartItems = async () => {
     try {
       const items = await getCartItems(user.email);  // Call getCartItems function
@@ -73,6 +83,7 @@ function Cart({ user }) {
 
   useEffect(() => {
     fetchCartItems();
+    console.log(cartItems);
   }, [user.email]);
   
   useEffect(() => {
@@ -169,12 +180,26 @@ function Cart({ user }) {
               ))}
             </Box>
 
-            <Button variant="contained" color="primary" fullWidth>
+            <Button 
+              variant="contained" 
+              color="primary" 
+              fullWidth 
+              onClick={openCheckoutModal}
+            >
               CHECKOUT
             </Button>
           </Box>
         </Box>
 
+         {/* Checkout Modal */}
+        <CheckoutModal
+          open={checkoutModalOpen}
+          onClose={closeCheckoutModal}
+          cartItems={cartItems}
+          totalPrice={totalPrice}
+          userData={userData}
+        />
+       
         {/* Edit Modal */}
         {selectedItem && (
           <EditPackageModal

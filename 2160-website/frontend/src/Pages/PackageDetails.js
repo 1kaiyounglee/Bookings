@@ -96,7 +96,7 @@ function PackageDetails({ user }) {
         startDate: startDate.toISOString().split('T')[0],
         endDate: endDate.toISOString().split('T')[0],
         numTravellers: numTravellers,
-        price: packageData.price * numTravellers,
+        price: (packageData.price * numTravellers).toFixed(2),
       }
       await insertBooking(email, bookingData);
       showSnackbar('Package added to cart!')

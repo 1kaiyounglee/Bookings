@@ -154,6 +154,7 @@ export async function getUserOrders(email) {
 
     if (!ordersMap[orderId]) {
       ordersMap[orderId] = {
+        orderId: row.order_id,
         date: row.order_date,
         paymentStatus: row.payment_status,
         totalPrice: row.total_price,

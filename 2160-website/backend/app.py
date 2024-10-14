@@ -6,8 +6,10 @@ from flask_jwt_extended import JWTManager
 sys.path.append(os.path.dirname(os.path.abspath(__file__)))  # fix pathing issues
 from flask_cors import CORS
 
+ # Import routes
 from api.api_db import api_db
-from api.api_auth import auth_bp  # Import auth routes
+from api.api_auth import auth_bp 
+from api.api_orders import api_orders  
 
 app = Flask(__name__)
 
@@ -22,7 +24,8 @@ jwt = JWTManager(app)
 
 # Register blueprints for database and authentication
 app.register_blueprint(api_db, url_prefix="/api/database")
-app.register_blueprint(auth_bp, url_prefix="/api/auth")  # Register auth blueprint
+app.register_blueprint(auth_bp, url_prefix="/api/auth")  
+app.register_blueprint(api_orders, url_prefix="/api/orders")  
 
 
 # Serve images from the backend/images folder
