@@ -68,7 +68,6 @@ function ManageUsersModal({ open, onClose }) {
           Manage Users
         </Typography>
 
-        {/* Display success message if present */}
         {successMessage && (
           <Alert severity="success" sx={{ mb: 2 }}>
             {successMessage}

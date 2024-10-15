@@ -65,7 +65,6 @@ function Account({ user }) {
             <Typography>Name: {user.firstName} {user.lastName}</Typography>
             <Typography>Email: {user.email}</Typography>
 
-            {/* Current Password */}
             <Field
               as={TextField}
               label="Current Password"
@@ -90,7 +89,6 @@ function Account({ user }) {
               }}
             />
 
-            {/* New Password */}
             <Field
               as={TextField}
               label="New Password"
@@ -113,7 +111,6 @@ function Account({ user }) {
               }}
             />
 
-            {/* Confirm New Password */}
             <Field
               as={TextField}
               label="Confirm New Password"

@@ -106,14 +106,13 @@ function App() {
             user={user}
           />
           <Box sx={{ paddingTop: '64px' }}></Box>
-          {/* Define the Routes */}
           <Routes>
             <Route path="/" element={<HomePage />} />
             <Route path="/package/:packageId" element={<PackageDetails user={user}/>} />
             {user.isAdmin && <Route path="/edit-package/:packageId" element={<EditPackageDetails user={user}/>} />}
             {user.isLoggedIn && <Route path="/bookings" element={<MyBookings user={user}/>} />}
             {user.isLoggedIn && <Route path="/cart" element={<Cart user = {user}/>}/>}
-            {user.isAdmin && <Route path="/admin" element={<AdminPanel user={user}/>} />}  {/* Admin route */}
+            {user.isAdmin && <Route path="/admin" element={<AdminPanel user={user}/>} />} 
             <Route path="/account" element={<Account user={user} />} />
             <Route path="/browse-packages" element={<BrowsePackages />} />
           </Routes>

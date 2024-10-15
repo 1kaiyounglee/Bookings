@@ -37,8 +37,8 @@ const EditPackageModal = ({ open, onClose, item, handleUpdateItem}) => {
           onChange={(e) => setTravellers(e.target.value)}
           sx={{ mb: 2 }}
         />
-        {/* DatePicker for Start Date */}
-        <Box sx={{ display: 'flex', gap: 2, mb: 2 }}>  {/* Add gap between DatePickers */}
+       
+        <Box sx={{ display: 'flex', gap: 2, mb: 2 }}>  
           <DatePicker
             label="Start Date"
             value={startDate}
