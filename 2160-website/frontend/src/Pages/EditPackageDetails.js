@@ -20,7 +20,9 @@ function EditPackageDetails() {
     location_id: '',
     duration: '',
     price: '',
+    images:[]
   });
+  const [newPackageId, setNewPackageId] = useState(null);
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
   const [openPreviewModal, setOpenPreviewModal] = useState(false);
   const [newImages, setNewImages] = useState([]);
@@ -33,8 +35,20 @@ function EditPackageDetails() {
     fetchPackageAndLocations();
     if (packageId !== 'new') {
       fetchPackageDetails(packageId);
+    } else {
+      calculateNewPackageId();
     }
   }, [packageId]);
+
+  async function calculateNewPackageId() {
+    const packageData = await getPackagesGeneral();
+    if (packageData.length > 0) {
+      const lastPackageId = Math.max(...packageData.map((p) => p.package_id));
+      setNewPackageId(lastPackageId + 1); // Set new package ID
+    } else {
+      setNewPackageId(1); // Set default to 1 if no packages exist
+    }
+  }
 
   // Fetch locations and categories (themes)
   async function fetchPackageAndLocations() {
@@ -152,7 +166,6 @@ function EditPackageDetails() {
   );
 
   const handleFileChange = (event) => {
-    console.log("file input triggered")
     const files = Array.from(event.target.files);
     const imagePreviews = files.map((file) => ({
       file, 
@@ -167,24 +180,19 @@ function EditPackageDetails() {
     try {
       const packageData = {
         ...packageDetails,
-        package_id: packageId,
+        package_id: packageId === 'new' ? newPackageId : packageId, // Use new package ID when adding
         categories: selectedThemes,
       };
       await upsertPackage(packageData);
-      
       if (newImages.length > 0) {
         const imageFiles = newImages.map((image) => image.file);
-        await insertPackageImages(packageId, imageFiles);
+        await insertPackageImages(packageData.package_id, imageFiles);
       }
-
       if (deletedImages.length > 0) {
-        console.log(deletedImages)
         await deletePackageImages(deletedImages);
       }
-  
-      navigate(`/package/${packageId}`); // Redirect to packages list or a success page
+      navigate(`/package/${packageData.package_id}`); // Navigate to updated package page
     } catch (error) {
-      console.error('Error upserting package:', error);
       showSnackbar('Failed to update package.');
     }
   };
@@ -255,10 +263,30 @@ function EditPackageDetails() {
           required
           sx={{ mb: 2 }}
         />
-        {/* Display existing and new images */}
-        {packageDetails.images && packageDetails.images.length > 0 && (
-          <Box sx={{ mb: 2 }}>
-            <Typography variant="subtitle1">Package Images:</Typography>
+
+        <Box sx={{ mb: 2 }}>
+          <Typography variant="subtitle1">Package Images:</Typography>
+          {packageId === 'new' && newImages.length === 0 ? (
+            <Box
+            sx={{
+              position: 'relative',
+              width: '100px',
+              height: '100px',
+              borderRadius: '8px',
+              overflow: 'hidden',
+              backgroundColor: '#f0f0f0', // Light gray background to mimic the box
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              color: '#999',
+              border: '1px dashed #ccc', // Dashed border to indicate it's a placeholder
+            }}
+          >
+            <Typography variant="body2" sx={{ textAlign: 'center' }}>
+              No images
+            </Typography>
+          </Box>
+          ) : (
             <Box sx={{ display: 'flex', gap: 2, flexWrap: 'wrap' }}>
               {/* Loop for existing images */}
               {packageDetails.images.map((imageUrl, index) => (
@@ -344,8 +372,9 @@ function EditPackageDetails() {
                 </Box>
               ))}
             </Box>
-          </Box>
-        )}
+          )}
+        </Box>
+
         {/* Upload Button */}
         <Button
           component="label"
