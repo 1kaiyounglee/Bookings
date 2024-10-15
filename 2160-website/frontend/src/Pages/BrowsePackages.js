@@ -26,6 +26,9 @@ function BrowsePackages() {
         setFilteredPackages(packageData);
         setLocations(locationData);
         setThemes(categoryData);
+        console.log("THEMES", categoryData);
+        console.log("locations", locations);
+
 
         // Get min/max for duration and price
         const durations = packageData.map(pkg => pkg.duration);
@@ -131,9 +134,9 @@ function BrowsePackages() {
               sx={{ marginBottom: '20px' }}
             >
               {themes.map((theme, index) => (
-                <MenuItem key={index} value={theme}>
-                  <Checkbox checked={values.theme.indexOf(theme) > -1} />
-                  <ListItemText primary={theme} />
+                <MenuItem key={index} value={theme.name}>
+                  <Checkbox checked={values.theme.indexOf(theme.name) > -1} />
+                  <ListItemText primary={theme.name} />
                 </MenuItem>
               ))}
             </TextField>
