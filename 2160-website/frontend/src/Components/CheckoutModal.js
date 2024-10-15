@@ -87,7 +87,6 @@ function CheckoutModal({ open, onClose, cartItems, totalPrice, userData }) {
           Checkout
         </Typography>
 
-        {/* Display success or error messages */}
         {successMessage && (
           <Alert severity="success" sx={{ mb: 2 }}>
             {successMessage}
@@ -155,7 +154,6 @@ function CheckoutModal({ open, onClose, cartItems, totalPrice, userData }) {
           </Box>
         </Box>
 
-        {/* PayPal Buttons for payment */}
         <PayPalScriptProvider options={initialOptions}>
           <PayPalButtons
             style={{ shape: "rect", layout: "vertical", color: "gold", label: "paypal" }}

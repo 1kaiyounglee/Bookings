@@ -112,7 +112,7 @@ function ManageBookingsModal({ open, onClose }) {
           Manage Bookings
         </Typography>
 
-        {/* Display success message if present */}
+        
         {successMessage && (
           <Alert severity="success" sx={{ mb: 2 }}>
             {successMessage}
@@ -147,7 +147,6 @@ function ManageBookingsModal({ open, onClose }) {
         >
           {({ values, handleChange, setFieldValue, handleSubmit, isSubmitting }) => (
             <Form onSubmit={handleSubmit}>
-              {/* Email Dropdown */}
               <FormControl fullWidth sx={{ mb: 3 }}>
                 <TextField
                   select
@@ -178,7 +177,6 @@ function ManageBookingsModal({ open, onClose }) {
                 </TextField>
               </FormControl>
 
-              {/* Package Dropdown */}
               <FormControl fullWidth sx={{ mb: 3 }}>
                 <TextField
                   select
@@ -204,13 +202,12 @@ function ManageBookingsModal({ open, onClose }) {
                 >
                   {filteredPackages.map((pkg, index) => (
                     <MenuItem key={index} value={pkg.package_name}>
-                      {pkg.package_name} {/* Display package name here */}
+                      {pkg.package_name}
                     </MenuItem>
                   ))}
                 </TextField>
               </FormControl>
 
-              {/* Date Dropdown */}
               <FormControl fullWidth sx={{ mb: 3 }}>
                 <TextField
                   select
@@ -242,7 +239,6 @@ function ManageBookingsModal({ open, onClose }) {
                 </TextField>
               </FormControl>
 
-              {/* Status Dropdown */}
               <FormControl fullWidth sx={{ mb: 3 }}>
                 <TextField
                   select

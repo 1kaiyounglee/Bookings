@@ -280,7 +280,6 @@ function ManagePackagesModal({ open, onClose }) {
             sx={{ mb: 2 }}
           />
 
-          {/* Manage Themes with Chips */}
           <Box sx={{ mb: 2 }}>
             <Typography variant="subtitle1" sx={{ color: 'white', mb: 1 }}>
               Themes (Categories)
@@ -297,7 +296,6 @@ function ManagePackagesModal({ open, onClose }) {
             </Box>
           </Box>
 
-          {/* Dropdown to add new theme */}
           <FormControl fullWidth sx={{ mb: 3 }}>
             <TextField
               select

@@ -351,7 +351,7 @@ export async function getLocations() {
 export async function getCategories() {
   const query = `SELECT category_id, name FROM Categories`;
   const data = await fetchDatabaseData(query);
-
+  console.log("CATEGORY DATA", data);
   if (!data) {
     throw new Error("Failed to fetch category data");
   }
@@ -366,7 +366,7 @@ export async function getCategories() {
 export async function getDistinctLocations() {
   const query = `SELECT DISTINCT city, country FROM Locations`;
   const data = await fetchDatabaseData(query);
-
+  console.log("LCOATION DATA", data);
   if (!data) {
     throw new Error("Failed to fetch distinct location data");
   }

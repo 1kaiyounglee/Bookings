@@ -42,14 +42,13 @@ function Navbar({ onLoginRegisterClick, handleLogout, user }) {
   return (
     <AppBar position="fixed">
       <Toolbar sx={{ justifyContent: 'space-between' }}>
-        {/* Home button now smaller and aligned to the left */}
         <Button color="inherit" onClick={handleHomeClick} sx={{ fontSize: '1rem', textTransform: 'none' }}>
           <Typography variant="h6" component="div">
             Holiday Booking System
           </Typography>
         </Button>
         {user.isLoggedIn ? (
-          <Box sx={{ display: 'flex', gap: '10px' }}> {/* Group buttons with spacing */}
+          <Box sx={{ display: 'flex', gap: '10px' }}> 
           <Tooltip title="Browse Packages">
               <IconButton color="inherit" onClick={handleBrowsePackagesClick}>
                 <TravelExploreRoundedIcon />
