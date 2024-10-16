@@ -122,7 +122,7 @@ def insert_sample_data():
         PackageCategory(package_id=15, category_id=4),
         PackageCategory(package_id=15, category_id=5),
     ]
-    # session.add_all(package_categories)
+    session.add_all(package_categories)
 
 
     # imagepath = "imageid packageid.jpg"
